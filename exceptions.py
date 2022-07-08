@@ -5,3 +5,5 @@ class MyEx(Exception):
 
 class myEx2(Exception):
     pass
+
+
