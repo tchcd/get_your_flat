@@ -2,3 +2,6 @@
 class MyEx(Exception):
     """Exception"""
     pass
+
+class myEx2(Exception):
+    pass
