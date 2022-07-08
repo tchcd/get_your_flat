@@ -9,13 +9,13 @@ import pickle
 import random
 import time
 
+# Заменить принты логами
 
-#Заменить принты логами
 
 RAND_TIME = random.uniform(1, 2.5)
-MAX_URL_RANGE = 11      # How many urls page we take for parsing at all
-LINKS_ON_PAGE = 4       # How many object on page we take now(for debug, true value == 55)
-PAGES_COUNT = 5         # How many pages we take now(for debug, true value == 11)
+MAX_URL_RANGE = 11  # How many urls page we take for parsing at all
+LINKS_ON_PAGE = 4  # How many object on page we take now(for debug, true value == 55)
+PAGES_COUNT = 5  # How many pages we take now(for debug, true value == 11)
 
 
 class AvitoParser:
@@ -70,25 +70,14 @@ class AvitoParser:
             times = self.driver.find_element(By.CLASS_NAME, 'style-item-metadata-date-1y5w6')
             times = times.text.lower().split()
             properties_list['time'] = times
-            # Перенести в обработку
-            #if times[0] == 'сегодня':
-            #    day = date.today() - timedelta(days=0)
-            #    properties_list['time'] = day.strftime('%d %m')
-            #elif times[0] == 'вчера':
-            #    day = date.today() - timedelta(days=1)
-            #    properties_list['time'] = day.strftime('%d %m')
-            #else:
-            #    properties_list['time'] = " ".join(times[:2])
-                # Или вообще стоп и тем самым перестать парсить
-                # break
             time.sleep(RAND_TIME)
 
             # Get subway
             print('get_subway')
             subway = self.driver.find_element(By.CLASS_NAME, 'style-item-address-georeferences-item-18pFt').text
             properties_list['subway'] = subway.split(',')[0]
-            properties_list['distance_to_subway'] = ','.join(subway.split(',')[1:]).strip()\
-                                                    if subway.split(',')[1:] != '' else None
+            properties_list['distance_to_subway'] = ','.join(subway.split(',')[1:]).strip() \
+                if subway.split(',')[1:] != '' else None
             time.sleep(RAND_TIME)
 
             # Get_properties_about_house
@@ -173,7 +162,7 @@ class AvitoParser:
             links = self.driver.find_elements(By.CLASS_NAME, 'iva-item-root-_lk9K')
             time.sleep(RAND_TIME)
 
-            #Нужно отрефакторить и собирать отдельно ссылки по всем 10 страницам,
+            # Нужно отрефакторить и собирать отдельно ссылки по всем 10 страницам,
             # потом отдельно запускать функцию по тем станицам
 
             for obj in range(len(links))[:PAGES_COUNT]:
