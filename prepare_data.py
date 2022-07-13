@@ -18,14 +18,14 @@ import json
 # create df
 def _prepare_dataframe(raw_data_from_parser: list) -> pd.DataFrame:
     """This function create and prepare working dataframe with objects from parser"""
-    cols = ['rating', 'time', 'price', 'address', 'subway', 'distance_to_subway', 'Количество комнат', 'Общая площадь',
+    cols = ['rating', 'shown', 'time', 'price', 'address', 'subway', 'distance_to_subway', 'Количество комнат', 'Общая площадь',
             'Жилая площадь', 'Площадь кухни', 'Этаж', 'Балкон или лоджия', 'Ремонт', 'Вид сделки', 'Тип дома',
             'Запланирован снос', 'link']
 
     main_df = pd.DataFrame(columns=cols).append(raw_data_from_parser)[cols]
     # main_df = main_df.append(data_from_parser)[cols]
     # main_df = main_df[cols]
-    main_df.columns = ['rating', 'time', 'price', 'address', 'subway', 'distance_to_subway', 'rooms', 'total_area', 'living_area',
+    main_df.columns = ['rating', 'shown', 'time', 'price', 'address', 'subway', 'distance_to_subway', 'rooms', 'total_area', 'living_area',
                        'kitchen_area', 'floor', 'balcony', 'type_of_renovation', 'type_of_deal', 'type_of_house',
                        'demolition_plan', 'link']
     # main_df[main_df.select_dtypes(include=object).columns.to_list()] = main_df.select_dtypes(include=object).applymap(
@@ -92,8 +92,8 @@ def _prepare_area(df):
 
 def _prepare_floors(df):
     df['floor'] = df['floor'].apply(lambda x: x.split())
-    df['cur_floor'] = df['floor'].apply(lambda x: x[0])
-    df['cnt_floors'] = df['floor'] = df['floor'].apply(lambda x: x[-1])
+    df['cur_floor'] = df['floor'].apply(lambda x: x[0]).astype(int)
+    df['cnt_floors'] = df['floor'].apply(lambda x: x[-1]).astype(int)
     return df
 
 
