@@ -7,9 +7,9 @@ import exceptions
 import json
 
 
-#ДОБАВИТЬ SHOWN COLUMN
-#1 этаж убить из модели
-#очень большой вес дать станциям метро и внимательно их отследить, киллер фича
+# ДОБАВИТЬ SHOWN COLUMN
+# 1 этаж убить из модели
+# очень большой вес дать станциям метро и внимательно их отследить, киллер фича
 
 # Подготовщик данных
 # отправляем в SQL
@@ -18,45 +18,45 @@ import json
 
 def avito_etl():  # -> собственный namedtuple
     # Parser module
-    #try:
+    # try:
     #    data = avito_parse(headless=True)
-    #except:
+    # except:
     #    print('parser does not work')
 
-    #try:
+    # try:
     #    with open('raw_parsed_items.json', 'w', encoding='utf-8') as file:
     #        json.dump(data, file, indent=4, ensure_ascii=False)
-    #except exceptions.file_write_fail as e:
+    # except exceptions.file_write_fail as e:
     #    print(f'raw json was not written {e}')
 
     # Prepare module
-    #try:
+    # try:
     #    prepared_df = prepare_parsed_card(data)
-    #except exceptions.file_write_fail as e:
+    # except exceptions.file_write_fail as e:
     #    print(f'prepared df was not written {e}')
 
-    #try:
+    # try:
     #    prepared_df.to_json('prepared_items_df.json', force_ascii=False, indent=4)
-    #except:
+    # except:
     #    print('not jsoning prep')
-    #finally:
+    # finally:
     #    prepared_df.to_csv(r'C:\Users\q\Desktop\view.csv', index=False)
 
-###### TEST ######
+    ###### TEST ######
 
-    #Prepare module
+    # Prepare module
     try:
-       prepared_df = prepare_parsed_card(data_test)
-       print(prepared_df)
+        prepared_df = prepare_parsed_card(data_test)
     except exceptions.file_write_fail as e:
-       print(f'prepared df was not written {e}')
+        print(f'prepared df was not written {e}')
 
     try:
         db = Database()
-        db.setup()     #already created
+        db.setup()  # already created
         db.add_parsed_items(column_values=prepared_df)
     except exceptions.db_connect_fail as e:
         print(f'{e} error database')
+
 
 # new_parsed_cards = start_daily_parse()
 

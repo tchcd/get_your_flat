@@ -1,27 +1,6 @@
 import sqlite3
 import pandas as pd
 import exceptions
-from typing import Dict, List, NamedTuple
-
-
-class flat_data(NamedTuple):
-    rating = float
-    time = str
-    price = int
-    address = str
-    subway = str
-    distance_to_subway = int
-    rooms = int or str
-    total_area = float
-    living_area = float
-    kitchen_area = float
-    balcony = str
-    type_of_renovation = str
-    type_of_house = str
-    link = str
-    cur_floor = int
-    cnt_floors = int
-    shown = bool
 
 
 class Database:
@@ -48,29 +27,37 @@ class Database:
                 type_of_house TEXT,     link TEXT,
                 cur_floor INTEGER,      cnt_floors INTEGER,
                 shown INTEGER)"""
-        #self.conn.execute(query)
+        # self.conn.execute(query)
         self.cursor.executescript(query)  # recreated table until test
         self.conn.commit()
 
     def add_parsed_items(self, column_values: pd.DataFrame, table: str = 'items'):
-       columns = ', '.join(column_values.columns)
-       values = [tuple(value) for value in column_values.values]
-       self.cursor.executemany(
-           f"INSERT INTO {table} ({columns}) VALUES ({','.join('?' * len(column_values.columns))})", values
-       )
-       self.conn.commit()
+        columns = ', '.join(column_values.columns)
+        values = [tuple(value) for value in column_values.values]
+        self.cursor.executemany(
+            f"INSERT INTO {table} ({columns}) VALUES ({','.join('?' * len(column_values.columns))})", values
+        )
+        self.conn.commit()
 
-    def send_top_to_telegram(self):
+    def get_top_five(self):
         """Забирает топ-5 объявлений"""
         query = """SELECT t.link FROM items t
-                WHERE t.shown = 0
+                WHERE t.shown is Null
                 ORDER BY t.rating DESC
                 LIMIT 5"""
         self.cursor.execute(query)
         result = self.cursor.fetchall()
-        return result
-        # return [x for x in self.conn.execute(query)]
-        # дальше можно распарсить и вернуть
+        return [x[0] for x in result]
+
+    def update_shown_cards(self, links, table='items'):
+        lns = "','".join(links)
+        print(lns)
+        query = f"""UPDATE {table}
+                SET shown = 1
+                WHERE link in {tuple(links)}"""
+
+        self.cursor.execute(query)
+        self.conn.commit()
 
     def get_all_items(self, table='items'):
         query = f"""SELECT * FROM {table} t"""
@@ -85,11 +72,6 @@ class Database:
         return result
 
     def delete_duplicates(self, table='items'):
-        pass
-
-    def add_daily_avito_cards_to_db(self):
-        """Отправляет в SQL подготовленные новые данные после ежедневного парсера"""
-        # query = insert all new data
         pass
 
     def get_cards_to_predict(self):
