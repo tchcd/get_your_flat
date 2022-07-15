@@ -5,6 +5,7 @@ from datetime import date, timedelta
 import pandas as pd
 import json
 
+
 # ПРОБЛЕМА В ТОМ ЧТО СТОЛБЫ ИНТЫ ОТОБРАЖЕНЫ КАК СТР
 # ПРОПУЩЕННЫЕ ЗНАЧЕНИЯ СПЛИТ 0 ЛИСТ ОФ РЕЙНДЖ
 # НЕ ВЫТАСКИВАЕТСЯ ТАЙМ, ДИСТАНС
@@ -18,14 +19,15 @@ import json
 # create df
 def _prepare_dataframe(raw_data_from_parser: list) -> pd.DataFrame:
     """This function create and prepare working dataframe with objects from parser"""
-    cols = ['rating', 'shown', 'time', 'price', 'address', 'subway', 'distance_to_subway', 'Количество комнат', 'Общая площадь',
-            'Жилая площадь', 'Площадь кухни', 'Этаж', 'Балкон или лоджия', 'Ремонт', 'Вид сделки', 'Тип дома',
-            'Запланирован снос', 'link']
+    cols = ['rating', 'shown', 'time', 'price', 'address', 'subway', 'distance_to_subway', 'Количество комнат',
+            'Общая площадь', 'Жилая площадь', 'Площадь кухни', 'Этаж', 'Балкон или лоджия', 'Ремонт', 'Вид сделки',
+            'Тип дома', 'Запланирован снос', 'link']
 
     main_df = pd.DataFrame(columns=cols).append(raw_data_from_parser)[cols]
     # main_df = main_df.append(data_from_parser)[cols]
     # main_df = main_df[cols]
-    main_df.columns = ['rating', 'shown', 'time', 'price', 'address', 'subway', 'distance_to_subway', 'rooms', 'total_area', 'living_area',
+    main_df.columns = ['rating', 'shown', 'time', 'price', 'address', 'subway', 'distance_to_subway', 'rooms',
+                       'total_area', 'living_area',
                        'kitchen_area', 'floor', 'balcony', 'type_of_renovation', 'type_of_deal', 'type_of_house',
                        'demolition_plan', 'link']
     # main_df[main_df.select_dtypes(include=object).columns.to_list()] = main_df.select_dtypes(include=object).applymap(
@@ -44,7 +46,7 @@ def _time_changer(time):
         yesterday = date.today() - timedelta(days=0)
         return yesterday.strftime('%Y-%m-%d')
     else:
-        #return date.today().strftime('%Y-%m-%d')
+        # return date.today().strftime('%Y-%m-%d')
         return time
 
 
@@ -147,6 +149,15 @@ def prepare_parsed_card(raw_data: list) -> pd.DataFrame:
     df = _fill_nan(df)
 
     return df
+
+
+def get_not_duplicated_items(df: pd.DataFrame, db_name) -> pd.DataFrame:
+    """Check if links exist in database and return dataframe with not existed items"""
+    links_to_add = df['link'].values
+    duplicated_links = db_name.check_if_link_exist(links_to_add)
+    ready_to_add_links = set(links_to_add) - set(duplicated_links)
+
+    return df[df['link'].isin(ready_to_add_links)]
 
 
 if __name__ == "__main__":

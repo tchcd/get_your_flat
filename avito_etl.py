@@ -1,6 +1,8 @@
 # Логика, склейка
+import pandas as pd
 from avito_parser_daily_script import avito_parse
-from prepare_data import prepare_parsed_card
+from prepare_data import prepare_parsed_card, get_not_duplicated_items
+#from test import get_not_duplicated_items
 from database import Database
 from test import data_test
 import exceptions
@@ -16,7 +18,16 @@ import json
 
 # Вызываем ежедневный парсер
 
+
+
+
 def avito_etl():  # -> собственный namedtuple
+    try:
+        db = Database()
+        db.setup()  # already created
+    except:
+        raise exceptions.db_connect_fail
+
     # Parser module
     # try:
     #    data = avito_parse(headless=True)
@@ -47,23 +58,17 @@ def avito_etl():  # -> собственный namedtuple
     # Prepare module
     try:
         prepared_df = prepare_parsed_card(data_test)
-    except exceptions.file_write_fail as e:
-        print(f'prepared df was not written {e}')
+        prepared = get_not_duplicated_items(df=prepared_df, db_name=db)
+    except:
+        print(f'prepared df was not written')
+        raise exceptions.file_write_fail
 
     try:
-        db = Database()
-        db.setup()  # already created
-        db.add_parsed_items(column_values=prepared_df)
+        db.add_parsed_items(column_values=prepared)
     except exceptions.db_connect_fail as e:
         print(f'{e} error database')
 
 
-# new_parsed_cards = start_daily_parse()
-
-
-# Вызываем функцию подготовки данных из модуля prepare_data
-# good_new_cards = prepare_parsed_card(new_parsed_cards: Parsed_cards) #-> а отдаем либо df либо json
-# для функции обработки
 
 # Отправляем SQL в DB
 # Database.add_daily_avito_cards_to_db(good_new_cards) #принимает json отдает ?? в БД
