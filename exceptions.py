@@ -4,7 +4,7 @@ class MyEx(Exception):
     pass
 
 
-class myEx2(Exception):
+class prepare_data_failed(Exception):
     pass
 
 

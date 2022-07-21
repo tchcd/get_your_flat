@@ -9,8 +9,6 @@ import pickle
 import random
 import time
 
-# Заменить принты логами
-
 
 RAND_TIME = random.uniform(1, 2.5)
 MAX_URL_RANGE = 11  # How many urls page we take for parsing at all
@@ -31,7 +29,7 @@ class AvitoParser:
             self.options.add_argument('--no-sandbox')
         self.driver = webdriver.Chrome(r"C:/Users/q/IdeaProjects/Python3/flatblet/chromedriver/chromedriver.exe",
                                        options=self.options)
-        self.rand_time = random.uniform(1, 2.5)
+        self.rand_time = RAND_TIME
         self.storage = []
 
     def auth_avito(self):
@@ -105,32 +103,16 @@ class AvitoParser:
         except Exception as err:
             print('Не удалалось обработать квартиру', err)
 
-    def _click_object(self, xpath, first_time=True, use_js=True):
-        """Find and click on filters object"""
-        element = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, xpath)))
-        try:
-            if use_js:
-                self.driver.execute_script("arguments[0].click();", element)
-            else:
-                element.click()
-        except Exception as exception:
-            if first_time:
-                element.location_once_scrolled_into_view
-                element.click()
-            else:
-                assert False, exception
-
     # filters
     def get_filters(self):
-        two_rooms = '/html/body/div[1]/div[3]/div[3]/div[1]/div/div[2]/div[1]/form/div[4]/div/div[2]/div/div/div/div/ul/li[3]/label/span'
-        three_rooms = '/html/body/div[1]/div[3]/div[3]/div[1]/div/div[2]/div[1]/form/div[4]/div/div[2]/div/div/div/div/ul/li[4]/label/span'
+        """Add filters for search cards"""
 
-        self._click_object(self.driver, two_rooms)
-        time.sleep(RAND_TIME)
-        self._click_object(self.driver, three_rooms)
-        time.sleep(RAND_TIME)
         self.driver.find_elements(By.CLASS_NAME, 'input-layout-stick-before-xYZY2')[0].send_keys(
             '10000000' + Keys.ENTER)
+        time.sleep(RAND_TIME)
+        self.driver.find_elements(By.CLASS_NAME, 'multi-select-checkbox-list-item-ub_Xu')[2].click()
+        time.sleep(RAND_TIME)
+        self.driver.find_elements(By.CLASS_NAME, 'multi-select-checkbox-list-item-ub_Xu')[3].click()
         time.sleep(RAND_TIME)
         self.driver.find_element(By.CLASS_NAME, 'styles-box-Up_E3').click()
         time.sleep(RAND_TIME)

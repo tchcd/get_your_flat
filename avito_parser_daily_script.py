@@ -9,7 +9,7 @@ from avito_parser_class import AvitoParser
 # 3. to_sql - функция, которая принимает prepare_parsed_card и льет их в БД
 
 
-def avito_parse(headless=False) -> list:
+def avito_parse_start(headless=False) -> list:
     if headless:
         parser = AvitoParser(headless=True)
     else:
@@ -21,16 +21,6 @@ def avito_parse(headless=False) -> list:
     return parser.storage
 
 
-# print(storage)
-
-# Тестовая функция db insert
-
-# Database.add_items('flat_db', {
-#     'column_1': 'data',
-#     'column_2': 'data2',
-#     'columns_3': 'Тут может быть любая функция из prepare_data'
-# })
-
 if __name__ == "__main__":
-    storage = avito_parse()
+    storage = avito_parse_start()
     print(storage)
