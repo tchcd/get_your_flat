@@ -24,4 +24,4 @@ def main_func(name: str) -> NamedTuple:
 
 
 if __name__ == '__main__':
-    print(main_func
+    print(main_func)

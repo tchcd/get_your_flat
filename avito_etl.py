@@ -1,10 +1,7 @@
-# Логика, склейка
 import pandas as pd
 from avito_parser_daily_script import avito_parse_start
 from prepare_data import prepare_parsed_card, get_not_duplicated_items
-# from test import get_not_duplicated_items
 from database import Database
-from test import data_test
 import exceptions
 import json
 
@@ -43,21 +40,6 @@ def avito_etl():  # -> собственный namedtuple
     finally:
         prepared_df.to_json('prepared_items_df1.json', force_ascii=False, indent=4)
         prepared_df.to_csv(r'C:\Users\q\Desktop\view.csv', index=False)
-
-    ###### TEST ######
-
-    # Prepare module
-    # try:
-    #     prepared_df = prepare_parsed_card(data_test)
-    #     prepared = get_not_duplicated_items(df=prepared_df, db_name=db)
-    # except exceptions.prepare_data_failed as err:
-    #     # logger.error(err)
-    #     print(f'prepared df was not written', err)
-    # finally:
-    #     prepared_df.to_json('prepared_items_df.json', force_ascii=False, indent=4)
-    #     prepared_df.to_csv(r'C:\Users\q\Desktop\view.csv', index=False)
-
-    #### TEST OFF ####
 
     # DB module
     try:
