@@ -5,6 +5,7 @@
 .idea
 flats_db
 test.py
+*.json
 
 # User-specific stuff
 .idea/**/workspace.xml
