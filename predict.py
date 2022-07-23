@@ -16,7 +16,7 @@ from catboost_daily_model import get_daily_predict
 not_evaluated_cards = Database.get_not_evaluated_cards()
 
 # Применяем CatBoost к неразмеченным
-predicted_cards = catboost_daily(not_evaluated_cards)
+predicted_cards = get_daily_predict(not_evaluated_cards)
 
 # Заливаем в БД
 Database.add_daily_avito_cards_to_db(predicted_cards)
