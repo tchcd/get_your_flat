@@ -23,7 +23,7 @@ app = Flask(__name__)
 
 
 def get_from_env(key):
-    dotenv_path = join(dirname(__file__), '.env')
+    dotenv_path = join(dirname(__file__), ".env")
     load_dotenv(dotenv_path)
     return os.environ.get(key)  # возвращает токен
 
@@ -44,11 +44,11 @@ def send_flats(chat_id, text):
 #     return res
 
 
-@app.route('/', methods=["POST"])
+@app.route("/", methods=["POST"])
 def hello():
-    chat_id = request.json['message']['chat']['id']
-    send_flats(chat_id=chat_id, text='Передал')
-    return {'ok': True}
+    chat_id = request.json["message"]["chat"]["id"]
+    send_flats(chat_id=chat_id, text="Передал")
+    return {"ok": True}
 
 
 # @app.route('/sum')
@@ -65,5 +65,5 @@ def hello():
 #         return 'Use POST query!'
 #
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run()

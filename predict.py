@@ -10,7 +10,7 @@ from catboost_daily_model import get_daily_predict
 # 3. отдает размеченные объекты в функцию миграции из модуля migration?
 
 
-#Не знаю, видимо обернуть это все в функцию predict() и запускать из main
+# Не знаю, видимо обернуть это все в функцию predict() и запускать из main
 
 # Получаем из БД не размеченные новые карточки, после парсера
 not_evaluated_cards = Database.get_not_evaluated_cards()

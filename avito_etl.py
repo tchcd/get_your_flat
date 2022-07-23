@@ -5,9 +5,9 @@ from database import Database
 import exceptions
 import json
 
-
 # 1 этаж убить из модели
-# очень большой вес дать станциям метро и внимательно их отследить, киллер фича
+# очень большой вес дать станциям метро и внимательно их отследить
+
 
 def avito_etl():  # -> собственный namedtuple
     try:
@@ -22,13 +22,13 @@ def avito_etl():  # -> собственный namedtuple
     try:
         data = avito_parse_start(headless=False)
     except:
-        print('parser does not work')
+        print("parser does not work")
 
     try:
-        with open('raw_parsed_items1.json', 'w', encoding='utf-8') as file:
+        with open("raw_parsed_items1.json", "w", encoding="utf-8") as file:
             json.dump(data, file, indent=4, ensure_ascii=False)
     except Exception as e:
-        print(f'raw json was not written {e}')
+        print(f"raw json was not written {e}")
 
     # Start prepare raw cards
     try:
@@ -36,16 +36,16 @@ def avito_etl():  # -> собственный namedtuple
         not_duplicated_items = get_not_duplicated_items(df=prepared_df, db_name=db)
     except Exception as err:
         # logger.error(err)
-        print(f'prepared df was not written', err)
+        print(f"prepared df was not written", err)
     finally:
-        prepared_df.to_json('prepared_items_df1.json', force_ascii=False, indent=4)
-        prepared_df.to_csv(r'C:\Users\q\Desktop\view.csv', index=False)
+        prepared_df.to_json("prepared_items_df1.json", force_ascii=False, indent=4)
+        prepared_df.to_csv(r"C:\Users\q\Desktop\view.csv", index=False)
 
     # DB module
     try:
         db.add_parsed_items(column_values=not_duplicated_items)
     except exceptions.db_connect_fail as e:
-        print(f'{e} error database')
+        print(f"{e} error database")
 
 
 if __name__ == "__main__":
