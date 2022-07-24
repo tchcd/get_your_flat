@@ -1,9 +1,17 @@
 # Это модуль подготовки данных после получения из пасрсера
-from typing import NamedTuple
+import logging
+from logcfg import logger_cfg
+import exceptions
+import pandas as pd
 from sklearn.impute import KNNImputer
 from datetime import date, timedelta
-import pandas as pd
+import dataenforce
 import json
+from test import raw
+
+logging.config.dictConfig(logger_cfg)
+log_error = logging.getLogger('log_error')
+log_info = logging.getLogger('log_info')
 
 
 # ПРОБЛЕМА В ТОМ ЧТО СТОЛБЫ ИНТЫ ОТОБРАЖЕНЫ КАК СТР
@@ -11,12 +19,8 @@ import json
 # НЕ ВЫТАСКИВАЕТСЯ ТАЙМ, ДИСТАНС
 # ВОПРОС УДАЛЯЕТ ЛИ ВООБЩЕ NANы ИЗ _prepare_subway
 
-# ТАк же принты заменить логами
 
-# class Parsed_cards(NamedTuple):
-#     price: int
-
-# create df
+# Create DataFrame
 def _prepare_dataframe(raw_data_from_parser: list) -> pd.DataFrame:
     """This function create and prepare working dataframe with objects from parser"""
     cols = [
@@ -41,8 +45,6 @@ def _prepare_dataframe(raw_data_from_parser: list) -> pd.DataFrame:
     ]
 
     main_df = pd.DataFrame(columns=cols).append(raw_data_from_parser)[cols]
-    # main_df = main_df.append(data_from_parser)[cols]
-    # main_df = main_df[cols]
     main_df.columns = [
         "rating",
         "shown",
@@ -63,9 +65,6 @@ def _prepare_dataframe(raw_data_from_parser: list) -> pd.DataFrame:
         "demolition_plan",
         "link",
     ]
-    # main_df[main_df.select_dtypes(include=object).columns.to_list()] = main_df.select_dtypes(include=object).applymap(
-    #     lambda x: np.nan if len(x) == 0 else x)
-
     return main_df
 
 
@@ -79,8 +78,7 @@ def _time_changer(time):
         yesterday = date.today() - timedelta(days=0)
         return yesterday.strftime("%Y-%m-%d")
     else:
-        # return date.today().strftime('%Y-%m-%d')
-        return time
+        return "-".join(time)
 
 
 def _prepare_time(df):
@@ -92,8 +90,6 @@ def _prepare_time(df):
 # Subway / Distance to subway
 def _prepare_subway(df):
     """Remove NaN-values from subway and distance_to_subway columns, and makes a correct distance column"""
-    print(df["minutes_to_subway"])
-    # Remove NaN
     df = df[~df["subway"].isna()].copy()
     df = df[~df["minutes_to_subway"].isna()].copy()
     return df[["subway", "minutes_to_subway"]]
@@ -133,7 +129,7 @@ def _drop_columns(df):
     df = df.loc[df["demolition_plan"] != "да"].copy()
     df = df[
         (df["type_of_deal"]).isna() | (df["type_of_deal"] == "возможна ипотека")
-    ].copy()
+        ].copy()
     df = df[df["cnt_floors"] != "1"].copy()
     df = df.loc[df["cnt_floors"] != df["cur_floor"]].copy()
 
@@ -156,30 +152,21 @@ def prepare_parsed_card(raw_data: list) -> pd.DataFrame:
     :return: Updated Dataframe
     """
     imputer = KNNImputer(n_neighbors=3)
-
-    print("Создали дф")
-    df = _prepare_dataframe(raw_data)
-    print("тайм")
-    df["time"] = _prepare_time(df)
-    print("сабвей")
-    df[["subway", "minutes_to_subway"]] = _prepare_subway(df)
-    print("ареа")
-    df[["total_area", "kitchen_area", "living_area"]] = _prepare_area(df)
-    print("импьютер")
-    df[["total_area", "living_area", "kitchen_area"]] = imputer.fit_transform(
-        df[["total_area", "living_area", "kitchen_area"]]
-    )
-    # df.to_csv(r'C:\Users\q\Desktop\view.csv', encoding='utf-8-sig')
-    print("обнулить отступы")
-    # df[df.select_dtypes(include=object).columns.to_list()] = df.select_dtypes(include=object).applymap(
-    #    lambda x: x.strip() if pd.notnull(x) else x)
-    # print(df)
-    print("этажи")
-    df = _prepare_floors(df)
-    print("drop")
-    df = _drop_columns(df)
-    print("fillna")
-    df = _fill_nan(df)
+    try:
+        log_info.info('START PARSED DATA PREPARING')
+        df = _prepare_dataframe(raw_data)
+        df["time"] = _prepare_time(df)
+        df[["subway", "minutes_to_subway"]] = _prepare_subway(df)
+        df[["total_area", "kitchen_area", "living_area"]] = _prepare_area(df)
+        df[["total_area", "living_area", "kitchen_area"]] = imputer.fit_transform(
+            df[["total_area", "living_area", "kitchen_area"]]
+        )
+        df = _prepare_floors(df)
+        df = _drop_columns(df)
+        df = _fill_nan(df)
+        log_info.info('STOP PARSED DATA PREPARING')
+    except:
+        raise exceptions.prepare_data_failed('DATA PREPARATION FAILED')
 
     return df
 
@@ -194,9 +181,4 @@ def get_not_duplicated_items(df: pd.DataFrame, db_name) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    ddd = prepare_parsed_card(data_test)
-    print(ddd)
-    ddd.to_csv(r"C:\Users\q\Desktop\view.csv", index=False)
-
-    # посмотрим какие тут данные
-    # и к каждому df['column'] применим функцию _четототам
+    raw_d = prepare_parsed_card(raw)

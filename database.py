@@ -8,14 +8,14 @@ class Database:
         self.dbname = dbname
         try:
             self.conn = sqlite3.connect(dbname)
-        except exceptions.db_connect_fail as e:
-            print(f"connect to database failed {e}")
+        except:
+            raise exceptions.db_connect_failed('db connection failed')
         self.cursor = self.conn.cursor()
         self.PREPARED_JSON = "prepared_items_df.json"
 
     def setup(self):
         query = """
-                --DROP TABLE IF EXISTS items;
+                DROP TABLE IF EXISTS items;
                 CREATE TABLE IF NOT EXISTS items(
                 id INTEGER PRIMARY KEY AUTOINCREMENT, 
                 rating REAL,            time TEXT, 
@@ -27,18 +27,21 @@ class Database:
                 type_of_house TEXT,     link TEXT,
                 cur_floor INTEGER,      cnt_floors INTEGER,
                 shown INTEGER )"""
-        self.conn.execute(query)
-        # self.cursor.executescript(query)  # recreated table until test
+        #self.conn.execute(query)
+        self.cursor.executescript(query)  # recreated table until test
         self.conn.commit()
 
     def add_parsed_items(self, column_values: pd.DataFrame, table: str = "items"):
         columns = ", ".join(column_values.columns)
         values = [tuple(value) for value in column_values.values]
-        self.cursor.executemany(
-            f"INSERT INTO {table} ({columns}) VALUES ({','.join('?' * len(column_values.columns))})",
-            values,
-        )
-        self.conn.commit()
+        try:
+            self.cursor.executemany(
+                f"INSERT INTO {table} ({columns}) VALUES ({','.join('?' * len(column_values.columns))})",
+                values,
+            )
+            self.conn.commit()
+        except:
+            raise exceptions.db_data_transfer_failed('PARSED DATA HAS NOT BEEN ADDED TO DATABASE')
 
     def get_top_five(self):
         """Get top five items"""

@@ -8,8 +8,16 @@ class MyEx(Exception):
 class prepare_data_failed(Exception):
     pass
 
+class flat_not_collected(Exception):
+    pass
 
-class db_connect_fail(Exception):
+class parse_data_failed(Exception):
+    pass
+
+class db_data_transfer_failed(Exception):
+    pass
+
+class db_connect_failed(Exception):
     pass
 
 

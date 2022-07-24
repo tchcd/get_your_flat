@@ -1,6 +1,6 @@
 # Это парсер для ежедневных (сегодня) объявлений именно скрипт
 # Вся логика в avito_parser
-
+import exceptions
 from avito_parser_class import AvitoParser
 
 
@@ -14,13 +14,16 @@ def avito_parse_start(headless=False) -> list:
         parser = AvitoParser(headless=True)
     else:
         parser = AvitoParser()
-    parser.auth_avito()
-    parser.get_filters()
-    pages = parser.pages_generation()
-    parser.parse_objects(pages)
+    try:
+        parser.auth_avito()
+        parser.get_filters()
+        pages = parser.pages_generation()
+        parser.parse_objects(pages)
+    except:
+        raise exceptions.parse_data_failed
+
     return parser.storage
 
 
 if __name__ == "__main__":
-    storage = avito_parse_start()
-    print(storage)
+    pass
