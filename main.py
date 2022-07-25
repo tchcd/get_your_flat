@@ -1,24 +1,39 @@
-# Тут склейка, запуск бота
-
-from typing import NamedTuple
-
-
-class Parser(NamedTuple):
-    first: str
-    second: str
-
-
-# Тут должна быть основная функция, которая по запросу из ТГ
-# отдает топ-5 объявлений отсортированных по рангу объявлений
-# который хранятся в БД
-# Эта функция принимает данные из БД
-# В ней вызывается модуль cards(объявления).get_top_cards(функция отдачи 5 объявлений)
+from flask import Flask, request
+import json
+import os
+from os.path import join, dirname
+import requests
+import dotenv
+from dotenv import load_dotenv
 
 
-def main_func(name: str) -> NamedTuple:
-    names = name.split()
-    return Parser(first=names[0], second=names[1])
+app = Flask(__name__)
+
+
+def get_from_env(key):
+    dotenv_path = join(dirname(__file__), ".env")
+    load_dotenv(dotenv_path)
+    return os.environ.get(key)  # возвращает токен
+
+
+def send_flats(chat_id, text):
+    method = "sendMessage"
+    token = get_from_env("TELEGRAM_BOT_TOKEN")
+    url = f"https://api.telegram.org/bot{token}/{method}"
+    data = {"chat_id": chat_id, "text": text}
+    requests.post(url, data=data)
+
+
+@app.route("/", methods=["POST"])
+def hello():
+    chat_id = request.json["message"]["chat"]["id"]
+    send_flats(chat_id=chat_id, text="msg")
+    return {"ok": True}
 
 
 if __name__ == "__main__":
-    print(main_func)
+    # get top-1 card sorted by rating from db
+    # sended items marks 'shown'
+    # 'where name != 'showm'
+
+    app.run()
