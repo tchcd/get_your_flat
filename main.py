@@ -25,7 +25,7 @@ def send_flats(chat_id, text):
 
 
 @app.route("/", methods=["POST"])
-def hello():
+def main():
     chat_id = request.json["message"]["chat"]["id"]
     send_flats(chat_id=chat_id, text="msg")
     return {"ok": True}
