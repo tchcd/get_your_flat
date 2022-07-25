@@ -6,6 +6,7 @@
 flats_db
 test.py
 *.json
+.logs
 
 # User-specific stuff
 .idea/**/workspace.xml
