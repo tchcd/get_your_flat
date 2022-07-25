@@ -25,7 +25,7 @@ def avito_etl():  # -> собственный namedtuple
     # Start daily parsing
     try:
         log_info.info("PARSING HAS STARTED")
-        data = avito_parse_start(headless=False)
+        data = avito_parse_start(headless=True)
         log_info.info("PARSING HAS BEEN SUCCESSFULLY COMPLETED")
     except exceptions.parse_data_failed as err:
         log_error.exception(err)

@@ -53,12 +53,14 @@ class AvitoParser:
         properties_list = {}
         try:
             # Get subway
+            log_info.info("GET SUBWAY")
             properties_list["subway"] = self.driver.find_element(
                 By.XPATH,
                 """/html/body/div[3]/div[1]/div/div/div[2]/div[2]/div[1]/div[2]/div[2]/div/div[2]/div[1]
                 /div/div/span/span[1]/span[2]""").text
 
             # Get distance
+            log_info.info("GET DISTANCE")
             distance = self.driver.find_elements(
                 By.CLASS_NAME, "style-item-address-georeferences-item-18pFt"
             )
@@ -68,6 +70,7 @@ class AvitoParser:
             time.sleep(RAND_TIME)
 
             # Get price
+            log_info.info("GET PRICE")
             price = int(
                 self.driver.find_elements(
                     By.CLASS_NAME, "style-price-value-main-1P7DJ"
@@ -79,6 +82,7 @@ class AvitoParser:
             time.sleep(RAND_TIME)
 
             # Get address
+            log_info.info("GET ADDRESS")
             address = self.driver.find_element(
                 By.CLASS_NAME, "style-item-address__string-3Ct0s"
             ).text
@@ -86,6 +90,7 @@ class AvitoParser:
             time.sleep(RAND_TIME)
 
             # Get time
+            log_info.info("GET TIME")
             times = self.driver.find_element(
                 By.CLASS_NAME, "style-item-metadata-date-1y5w6"
             )
@@ -94,6 +99,7 @@ class AvitoParser:
             time.sleep(RAND_TIME)
 
             # Get properties about house
+            log_info.info("GET PROPERTIES HOUSE")
             house = self.driver.find_elements(
                 By.CLASS_NAME, "style-item-params-list-3YJu7"
             )
@@ -104,6 +110,7 @@ class AvitoParser:
                     properties_list[column] = value.strip()
 
             # Get properties about flat
+            log_info.info("GET PROPERTIES FLAT")
             flat = self.driver.find_elements(By.CLASS_NAME, "params-paramsList-2PiKQ")
             for items in flat:
                 flat_properties_list = items.text.split("\n")
@@ -113,14 +120,14 @@ class AvitoParser:
             time.sleep(RAND_TIME)
 
             # Get link
+            log_info.info("GET LINK")
             link = f"{self.driver.current_url}"
             properties_list["link"] = link if link else None
             time.sleep(RAND_TIME)
-
-            return properties_list
-
         except:
-            raise exceptions.flat_not_collected('THE FLAT HAS NOT COLLECTED')
+            log_info.info("EXCEPT HANDLING PROPERTIES")
+
+        return properties_list
 
     # filters
     def get_filters(self):
@@ -153,14 +160,14 @@ class AvitoParser:
         pages = []
         for num in page_range:
             pages.append(f"{cur_page[:-6]}&p={num}&s=104")
-        log_info(f'ALL READY PAGES - {pages}')
+        log_info.info(f'ALL READY PAGES - {pages}')
 
         return pages
 
     def parse_objects(self, pages):
         # стартуем с первой страницы и идем по страницам, сколько их задали
         for page_url in pages:
-            log_info.info(f"CURRENT NUM OF PAGES {page_url}")
+            log_info.info(f"CURRENT PAGE {page_url}")
             self.driver.get(page_url)
             time.sleep(RAND_TIME)
 
@@ -169,26 +176,23 @@ class AvitoParser:
             time.sleep(RAND_TIME)
 
             for obj in range(len(links))[:LINKS_ON_PAGE]:
+                log_info.info(F"COLLECTING {obj} LINK")
                 try:
-                    log_info(F"COLLECT {obj} LINK")
                     links[obj].click()
-
                     time.sleep(RAND_TIME)
                     self.driver.switch_to.window(self.driver.window_handles[1])
-
                     data = (
                         self._handling_properties()
                     )  # Launch collection data from object
                     if data is not None:
                         self.storage.append(data)
-
                     time.sleep(RAND_TIME)
-
                     self.driver.close()
-
-                    log_info.info(f"COLLECTED {obj}")
                     self.driver.switch_to.window(self.driver.window_handles[0])
-
+                    log_info.info(f"{obj} LINK HAS BEEN COLLECTED")
                 except:
-                    log_info.info(f"{obj} WAS NOT COLLECTED")
-                    raise exceptions.flat_not_collected(f"{obj} was not collected")
+                    log_info.info(f"{obj} LINK WAS NOT COLLECTED {links[obj]}")
+
+
+
+
