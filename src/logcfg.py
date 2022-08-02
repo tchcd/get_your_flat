@@ -24,7 +24,7 @@ logger_cfg = {
             'class': 'logging.FileHandler',
             'level': 'INFO',
             'formatter': 'base_formatter',
-            'filename': './logs/info.log',
+            'filename': '../../logs/info.log',
             'mode': 'a'
         },
         'console_error': {
@@ -37,7 +37,7 @@ logger_cfg = {
             'class': 'logging.FileHandler',
             'level': 'ERROR',
             'formatter': 'error_formatter',
-            'filename': './logs/errors.log',
+            'filename': '../../logs/errors.log',
             'mode': 'a'
         },
 

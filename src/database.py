@@ -1,10 +1,10 @@
 import sqlite3
 import pandas as pd
-import exceptions
+from src import exceptions
 
 
 class Database:
-    def __init__(self, dbname="flats_db"):
+    def __init__(self, dbname="../../flats.db"):
         self.dbname = dbname
         try:
             self.conn = sqlite3.connect(dbname)
@@ -19,20 +19,21 @@ class Database:
                 CREATE TABLE IF NOT EXISTS items(
                 id INTEGER PRIMARY KEY AUTOINCREMENT, 
                 rating REAL,            time TEXT, 
-                price INTEGER,          address TEXT, 
-                subway TEXT,            minutes_to_subway INTEGER,
-                rooms INTEGER,          total_area REAL, 
-                living_area REAL,       kitchen_area REAL, 
+                price INTEGER,          sqmeter_price INTEGER,
+                address TEXT,           subway TEXT,            
+                rooms INTEGER,          minutes_to_subway INTEGER,
+                total_area REAL,
                 balcony TEXT,           type_of_renovation TEXT,
                 type_of_house TEXT,     link TEXT,
                 cur_floor INTEGER,      cnt_floors INTEGER,
                 shown INTEGER )"""
-        self.conn.execute(query)
-        #self.cursor.executescript(query)  # recreated table until test
+        #self.conn.execute(query)
+        self.cursor.executescript(query)  # recreated table for test
         self.conn.commit()
 
     def add_parsed_items(self, column_values: pd.DataFrame, table: str = "items"):
         columns = ", ".join(column_values.columns)
+        print(columns)
         values = [tuple(value) for value in column_values.values]
         try:
             self.cursor.executemany(

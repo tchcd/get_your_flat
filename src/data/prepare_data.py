@@ -14,12 +14,6 @@ log_error = logging.getLogger('log_error')
 log_info = logging.getLogger('log_info')
 
 
-# ПРОБЛЕМА В ТОМ ЧТО СТОЛБЫ ИНТЫ ОТОБРАЖЕНЫ КАК СТР
-# ПРОПУЩЕННЫЕ ЗНАЧЕНИЯ СПЛИТ 0 ЛИСТ ОФ РЕЙНДЖ
-# НЕ ВЫТАСКИВАЕТСЯ ТАЙМ, ДИСТАНС
-# ВОПРОС УДАЛЯЕТ ЛИ ВООБЩЕ NANы ИЗ _prepare_subway
-
-
 # Create DataFrame
 def _prepare_dataframe(raw_data_from_parser: list) -> pd.DataFrame:
     """This function create and prepare working dataframe with objects from parser"""
@@ -33,8 +27,6 @@ def _prepare_dataframe(raw_data_from_parser: list) -> pd.DataFrame:
         "minutes_to_subway",
         "Количество комнат",
         "Общая площадь",
-        "Жилая площадь",
-        "Площадь кухни",
         "Этаж",
         "Балкон или лоджия",
         "Ремонт",
@@ -55,8 +47,6 @@ def _prepare_dataframe(raw_data_from_parser: list) -> pd.DataFrame:
         "minutes_to_subway",
         "rooms",
         "total_area",
-        "living_area",
-        "kitchen_area",
         "floor",
         "balcony",
         "type_of_renovation",
@@ -71,10 +61,10 @@ def _prepare_dataframe(raw_data_from_parser: list) -> pd.DataFrame:
 # Time prepare
 def _time_changer(time):
     """This function converts time values and uses them in the _prepare_time func"""
-    if time[0].lower() == "вчера":
+    if time[0] == "вчера":
         yesterday = date.today() - timedelta(days=1)
         return yesterday.strftime("%Y-%m-%d")
-    elif time[0].lower() == "сегодня":
+    elif time[0] == "сегодня":
         yesterday = date.today() - timedelta(days=0)
         return yesterday.strftime("%Y-%m-%d")
     else:
@@ -83,8 +73,8 @@ def _time_changer(time):
 
 def _prepare_time(df):
     """This function makes correct time column"""
-    df["time"] = df["time"].apply(lambda x: _time_changer(x))
-    return df["time"]
+    df["time"] = df["time"].apply(lambda x: _time_changer(x) if type(x) is list else None)
+    return df
 
 
 # Subway / Distance to subway
@@ -92,7 +82,7 @@ def _prepare_subway(df):
     """Remove NaN-values from subway and distance_to_subway columns, and makes a correct distance column"""
     df = df[~df["subway"].isna()].copy()
     df = df[~df["minutes_to_subway"].isna()].copy()
-    return df[["subway", "minutes_to_subway"]]
+    return df
 
 
 # Area
@@ -106,20 +96,12 @@ def _round_area(obj):
 
 
 def _prepare_area(df):
-    df["total_area"] = df["total_area"].apply(lambda x: x.split()[0].split(".")[0])
-    df["kitchen_area"] = df["kitchen_area"].apply(
-        lambda x: int(x.split()[0].split(".")[0]) + 1
-        if int(x.split()[0].split(".")[-1]) >= 5
-        else int(x.split()[0].split(".")[0])
-    )
-    df["living_area"] = df["living_area"].apply(
-        lambda x: _round_area(x) if pd.notnull(x) else x
-    )
-    return df[["total_area", "kitchen_area", "living_area"]]
+    df["total_area"] = df["total_area"].apply(lambda x: str(x).split()[0].split(".")[0]).astype('float')
+    return df
 
 
 def _prepare_floors(df):
-    df["floor"] = df["floor"].apply(lambda x: x.split())
+    df["floor"] = df["floor"].apply(lambda x: str(x).split())
     df["cur_floor"] = df["floor"].apply(lambda x: x[0]).astype(int)
     df["cnt_floors"] = df["floor"].apply(lambda x: x[-1]).astype(int)
     return df
@@ -151,19 +133,21 @@ def prepare_parsed_card(raw_data: list) -> pd.DataFrame:
     :param raw_data: raw list of dictionaries after parsing
     :return: Updated Dataframe
     """
-    imputer = KNNImputer(n_neighbors=3)
+    need_keys = ['time', 'price', "subway", "minutes_to_subway",
+                 "Количество комнат", "Общая площадь", "Этаж"]
+    raw_data = [valid for valid in raw_data if not need_keys - valid.keys()]  # check valid
+
     try:
         log_info.info('START PARSED DATA PREPARING')
         df = _prepare_dataframe(raw_data)
-        df["time"] = _prepare_time(df)
-        df[["subway", "minutes_to_subway"]] = _prepare_subway(df)
-        df[["total_area", "kitchen_area", "living_area"]] = _prepare_area(df)
-        df[["total_area", "living_area", "kitchen_area"]] = imputer.fit_transform(
-            df[["total_area", "living_area", "kitchen_area"]]
-        )
+        df = _prepare_time(df)
+        df = _prepare_subway(df)
+        df = _prepare_area(df)
         df = _prepare_floors(df)
         df = _drop_columns(df)
         df = _fill_nan(df)
+        df['sqmeter_price'] = df['price'] // df['total_area']
+        df["rooms"].astype(int)
         log_info.info('STOP PARSED DATA PREPARING')
     except:
         raise exceptions.prepare_data_failed('DATA PREPARATION FAILED')
