@@ -49,12 +49,12 @@ def avito_etl():  # -> собственный namedtuple
         prepared_df.to_csv("../../files/process/prepared_items_df.csv")
 
     # Add parsed items to database
-    # try:
-    #     not_duplicated_items = get_not_duplicated_items(df=prepared_df, db_name=db)
-    #     db.add_parsed_items(column_values=not_duplicated_items)
-    #     log_info.info('PREPARED DATA ADDED TO DATABASE')
-    # except exceptions.db_data_transfer_failed as err:
-    #     log_error.exception(err)
+    try:
+        not_duplicated_items = get_not_duplicated_items(df=prepared_df, db_name=db)
+        db.add_parsed_items(column_values=not_duplicated_items)
+        log_info.info('PREPARED DATA ADDED TO DATABASE')
+    except exceptions.db_data_transfer_failed as err:
+        log_error.exception(err)
 
 
 if __name__ == "__main__":
