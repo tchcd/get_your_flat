@@ -1,5 +1,6 @@
 import logging
 from src.logcfg import logger_cfg
+from datetime import datetime
 from avito_parser_daily_script import avito_parse_start
 from prepare_data import prepare_parsed_card, get_not_duplicated_items
 from src.database import Database
@@ -13,12 +14,10 @@ import os
 logging.config.dictConfig(logger_cfg)
 log_error = logging.getLogger('log_error')
 log_info = logging.getLogger('log_info')
+DATE_NOW = datetime.now().date().strftime(format='%m-%d')
 
-# 1 этаж убить из модели
-# очень большой вес дать станциям метро и внимательно их отследить
-
-
-def avito_etl():  # -> собственный namedtuple
+def avito_etl():
+    """Pipline avito parsing -> prepare raw data -> add prepared data to database"""
     try:
         db = Database()
         db.setup()  # already created
@@ -34,7 +33,7 @@ def avito_etl():  # -> собственный namedtuple
     # except exceptions.parse_data_failed as err:
     #     log_error.exception(err)
     # finally:
-    #     with open("raw_parsed_items.json", "w", encoding="utf-8") as file:
+    #     with open(f"../../files/process/raw_parsed_items_{DATE_NOW}.json", "w", encoding="utf-8") as file:
     #         json.dump(data, file, indent=4, ensure_ascii=False)
 
     # Start preparing raw cards
@@ -45,8 +44,8 @@ def avito_etl():  # -> собственный namedtuple
     except exceptions.prepare_data_failed as err:
         log_error.exception(err)
     finally:
-        prepared_df.to_json("../../files/process/prepared_items_df.json", force_ascii=False, indent=4)
-        prepared_df.to_csv("../../files/process/prepared_items_df.csv")
+        prepared_df.to_json(f"../../files/process/prepared_items_df_{DATE_NOW}.json", force_ascii=False, indent=4)
+        prepared_df.to_csv(f"../../files/process/prepared_items_df_{DATE_NOW}.csv", index=False)
 
     # Add parsed items to database
     try:
