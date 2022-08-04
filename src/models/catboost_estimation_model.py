@@ -1,33 +1,32 @@
 import pickle
 import json
 import pandas as pd
-
-# Для начала нужно из jupyter выгрузить обученную модель кэтбуст
-# и подгружаем здесь
-
-
-last_model_path = "./models/init_model.sav"
-model = pickle.load(open(last_model_path, "rb"))
-cols = model.feature_names_
+from src.database import Database
+from datetime import datetime
 
 
-# Здесь функция кэтбуста
-def get_daily_predict(raw_json: json) -> pd.DataFrame:
+BASE_MODEL_PATH = "../../models/cb_init.sav"
+LAST_MODEL_PATH = "../../models/cb_last.sav"
+MODEL = pickle.load(open(LAST_MODEL_PATH, "rb"))
+COLUMNS = MODEL.feature_names_
+
+
+def get_daily_predict() -> pd.DataFrame:
     """CatBoost function does predictions for not evaluation dataframe after parsing function
-
     Args:
         raw_json (json) : json with data objects
-
     Returns:
         pd.DataFrame: with evaluation value. Sending to the database
-
     """
-
-    df = pd.read_json(raw_json)
-    df["rating"] = model.predict(df[cols])
+    db = Database()
+    df = db.get_all_items()
+    df["rating"] = MODEL.predict(df[COLUMNS])
     return df
 
 
 if __name__ == "__main__":
-    predict = get_daily_predict("json_prep.json")
-    predict.to_csv(r"C:\Users\q\Desktop\view_w_r.csv")
+    estimation_df = get_daily_predict()
+    estimation_df.to_csv(f"../../files/process/estimated_df_{1}.csv")
+    print('gotovo')
+
+

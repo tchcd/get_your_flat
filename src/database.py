@@ -99,8 +99,13 @@ class Database:
     ):
         columns = ", ".join(column_values.columns)
         values = [tuple(value) for value in column_values.values]
-        self.cursor.executemany(
-            f"REPLACE INTO {table} ({columns}) VALUES({','.join('?' * len(column_values.columns))}",
-            values,
-        )
+        self.cursor.executescript(f"REPLACE INTO {table}({columns}) VALUES({values}")
         self.conn.commit()
+
+
+    def update(self, non_rating_df: pd.DataFrame, estimated_df: pd.DataFrame, table: str = "items"):
+        query = f"""
+                UPDATE {table} SET rating
+                WHERE {non_rating_df}.id = {estimated_df}.id
+        """
+        pass
