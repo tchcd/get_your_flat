@@ -27,7 +27,7 @@ class Database:
                 type_of_house TEXT,     link TEXT,
                 cur_floor INTEGER,      cnt_floors INTEGER,
                 shown INTEGER )"""
-        #self.conn.execute(query)
+        # self.conn.execute(query)
         self.cursor.executescript(query)  # recreated table for test
         self.conn.commit()
 
@@ -68,6 +68,13 @@ class Database:
         df = pd.read_sql(query, self.conn)
         return df
 
+    def get_non_estimated_items(self, table="items") -> pd.DataFrame:
+        """Select non estimated items from database"""
+        query = f"""SELECT * FROM {table} t
+                WHERE t.rating is Null;"""
+        df = pd.read_sql(query, self.conn)
+        return df
+
     def check_if_link_exist(self, added_values: list, table="items"):
         query = (
             f"""SELECT t.link FROM {table} t WHERE t.link in {tuple(added_values)}"""
@@ -93,19 +100,12 @@ class Database:
         result = self.cursor.fetchall()
         return result
 
-    #### NON CHECKED FUNCTION!###
-    def replace_estimated_cards(
-        self, column_values: pd.DataFrame, table: str = "items"
-    ):
-        columns = ", ".join(column_values.columns)
-        values = [tuple(value) for value in column_values.values]
-        self.cursor.executescript(f"REPLACE INTO {table}({columns}) VALUES({values}")
-        self.conn.commit()
+    def update_estimated_items(self, estimated_df: pd.DataFrame, table: str = "items"):
+        estimated_df.to_sql('temp_table', self.conn, if_exists='replace')  # create temp table with rating
 
-
-    def update(self, non_rating_df: pd.DataFrame, estimated_df: pd.DataFrame, table: str = "items"):
         query = f"""
-                UPDATE {table} SET rating
-                WHERE {non_rating_df}.id = {estimated_df}.id
-        """
-        pass
+                UPDATE {table} AS i
+                SET rating = (SELECT t.rating FROM temp_table t WHERE t.id = i.id)
+                """
+        self.cursor.execute(query)
+        self.conn.commit()
