@@ -15,7 +15,7 @@ class Database:
 
     def setup(self):
         query = """
-                DROP TABLE IF EXISTS items;
+                --DROP TABLE IF EXISTS items;
                 CREATE TABLE IF NOT EXISTS items(
                 id INTEGER PRIMARY KEY AUTOINCREMENT, 
                 rating REAL,            time TEXT, 
@@ -27,13 +27,12 @@ class Database:
                 type_of_house TEXT,     link TEXT,
                 cur_floor INTEGER,      cnt_floors INTEGER,
                 shown INTEGER )"""
-        # self.conn.execute(query)
-        self.cursor.executescript(query)  # recreated table for test
+        self.conn.execute(query)
+        #self.cursor.executescript(query)  # recreated table for test
         self.conn.commit()
 
     def add_parsed_items(self, column_values: pd.DataFrame, table: str = "items"):
         columns = ", ".join(column_values.columns)
-        print(columns)
         values = [tuple(value) for value in column_values.values]
         try:
             self.cursor.executemany(
@@ -68,7 +67,7 @@ class Database:
         df = pd.read_sql(query, self.conn)
         return df
 
-    def get_non_estimated_items(self, table="items") -> pd.DataFrame:
+    def get_not_estimated_items(self, table="items") -> pd.DataFrame:
         """Select non estimated items from database"""
         query = f"""SELECT * FROM {table} t
                 WHERE t.rating is Null;"""
@@ -86,26 +85,26 @@ class Database:
     def get_duplicates(self, table="items"):
         query = f"""SELECT COUNT(DISTINCT(t.link)), COUNT(*) FROM {table} t"""
         self.cursor.execute(query)
-        result = self.cursor.fetchall()
-        return result
+        return self.cursor.fetchall()
 
     def delete_duplicates(self, table="items"):
-        pass
-
-    def get_cards_to_predict(self) -> pd.DataFrame:
-        """Get items without rating"""
-
-        query = "SELECT * FROM table t WHERE t.rating = Null"
+        query = f"""
+                DELETE FROM {table}
+                WHERE rowid NOT IN (
+                SELECT MIN(rowid) 
+                FROM {table}
+                GROUP BY link
+                )
+                """
         self.cursor.execute(query)
-        result = self.cursor.fetchall()
-        return result
+        self.conn.commit()
 
     def update_estimated_items(self, estimated_df: pd.DataFrame, table: str = "items"):
         estimated_df.to_sql('temp_table', self.conn, if_exists='replace')  # create temp table with rating
-
         query = f"""
-                UPDATE {table} AS i
-                SET rating = (SELECT t.rating FROM temp_table t WHERE t.id = i.id)
+                UPDATE items
+                SET rating = (SELECT t.rating FROM temp_table t WHERE t.id = items.id)
+                WHERE rating is Null
                 """
         self.cursor.execute(query)
         self.conn.commit()

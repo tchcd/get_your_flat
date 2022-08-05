@@ -17,7 +17,7 @@ log_error = logging.getLogger('log_error')
 log_info = logging.getLogger('log_info')
 
 RAND_TIME = random.uniform(1, 2.5)
-MAX_URL_RANGE = 30  # How many urls page we take for parsing at all
+MAX_URL_RANGE = 10  # How many urls page we take for parsing at all
 LINKS_ON_PAGE = 55  # How many object on page we take now(for debug, true value == 55)
 
 

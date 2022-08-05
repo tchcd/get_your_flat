@@ -7,7 +7,7 @@ from sklearn.impute import KNNImputer
 from datetime import date, timedelta
 import dataenforce
 import json
-from test import raw
+#from test import raw
 
 logging.config.dictConfig(logger_cfg)
 log_error = logging.getLogger('log_error')
@@ -135,7 +135,7 @@ def prepare_parsed_card(raw_data: list) -> pd.DataFrame:
     """
     need_keys = ['time', 'price', "subway", "minutes_to_subway",
                  "Количество комнат", "Общая площадь", "Этаж"]
-    raw_data = [valid for valid in raw_data if not need_keys - valid.keys()]  # check valid
+    raw_data = [valid for valid in raw_data if not need_keys - valid.keys()]  # check if needed keys in raw items exists
 
     try:
         log_info.info('START PARSED DATA PREPARING')
@@ -148,6 +148,7 @@ def prepare_parsed_card(raw_data: list) -> pd.DataFrame:
         df = _fill_nan(df)
         df['sqmeter_price'] = df['price'] // df['total_area']
         df["rooms"].astype(int)
+        df = df.drop_duplicates('link')
         log_info.info('STOP PARSED DATA PREPARING')
     except:
         raise exceptions.prepare_data_failed('DATA PREPARATION FAILED')
@@ -165,4 +166,4 @@ def get_not_duplicated_items(df: pd.DataFrame, db_name) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    raw_d = prepare_parsed_card(raw)
+    pass#prepare_parsed_card(raw)
