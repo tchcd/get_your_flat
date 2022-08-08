@@ -53,14 +53,12 @@ class AvitoParser:
         properties_list = {}
         try:
             # Get subway
-            log_info.info("GET SUBWAY")
             properties_list["subway"] = self.driver.find_element(
                 By.XPATH,
                 """/html/body/div[3]/div[1]/div/div/div[2]/div[2]/div[1]/div[2]/div[2]/div/div[2]/div[1]
                 /div/div/span/span[1]/span[2]""").text
 
             # Get distance
-            log_info.info("GET DISTANCE")
             distance = self.driver.find_elements(
                 By.CLASS_NAME, "style-item-address-georeferences-item-18pFt"
             )
@@ -70,7 +68,6 @@ class AvitoParser:
             time.sleep(RAND_TIME)
 
             # Get price
-            log_info.info("GET PRICE")
             price = int(
                 self.driver.find_elements(
                     By.CLASS_NAME, "style-price-value-main-1P7DJ"
@@ -82,7 +79,6 @@ class AvitoParser:
             time.sleep(RAND_TIME)
 
             # Get address
-            log_info.info("GET ADDRESS")
             address = self.driver.find_element(
                 By.CLASS_NAME, "style-item-address__string-3Ct0s"
             ).text
@@ -90,7 +86,6 @@ class AvitoParser:
             time.sleep(RAND_TIME)
 
             # Get time
-            log_info.info("GET TIME")
             times = self.driver.find_element(
                 By.CLASS_NAME, "style-item-metadata-date-1y5w6"
             )
@@ -99,7 +94,6 @@ class AvitoParser:
             time.sleep(RAND_TIME)
 
             # Get properties about house
-            log_info.info("GET PROPERTIES HOUSE")
             house = self.driver.find_elements(
                 By.CLASS_NAME, "style-item-params-list-3YJu7"
             )
@@ -110,7 +104,6 @@ class AvitoParser:
                     properties_list[column] = value.strip()
 
             # Get properties about flat
-            log_info.info("GET PROPERTIES FLAT")
             flat = self.driver.find_elements(By.CLASS_NAME, "params-paramsList-2PiKQ")
             for items in flat:
                 flat_properties_list = items.text.split("\n")
@@ -120,7 +113,6 @@ class AvitoParser:
             time.sleep(RAND_TIME)
 
             # Get link
-            log_info.info("GET LINK")
             link = f"{self.driver.current_url}"
             properties_list["link"] = link if link else None
             time.sleep(RAND_TIME)
@@ -129,10 +121,8 @@ class AvitoParser:
 
         return properties_list
 
-    # filters
     def get_filters(self):
-        """Add filters for search cards"""
-
+        """Add filters on the homepage"""
         self.driver.find_elements(By.CLASS_NAME, "input-layout-stick-before-xYZY2")[0].send_keys("10000000" + Keys.ENTER)
         time.sleep(RAND_TIME)
         self.driver.find_elements(
@@ -152,20 +142,18 @@ class AvitoParser:
         return self
 
     def pages_generation(self):
-        # Формируем числа для добавления к url страницам, по которым пойдем
+        """ Generation correct link-path for parser"""
         page_range = [i for i in range(1, MAX_URL_RANGE+1)]
-
-        # получаем ссылки на все страницы, по которым пойдем
         cur_page = self.driver.current_url
         pages = []
         for num in page_range:
             pages.append(f"{cur_page[:-6]}&p={num}&s=104")
         log_info.info(f'ALL READY PAGES - {pages}')
-
         return pages
 
-    def parse_objects(self, pages):
-        # стартуем с первой страницы и идем по страницам, сколько их задали
+    def parse_objects(self, pages: list) -> None:
+        """Start parsing from first page to given "MAX_URL_LINKS" page"""
+
         for page_url in pages:
             log_info.info(f"CURRENT PAGE {page_url}")
             self.driver.get(page_url)

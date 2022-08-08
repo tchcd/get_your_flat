@@ -1,13 +1,9 @@
-import logging
-
-import pandas as pd
-
-from src.logcfg import logger_cfg
-from datetime import datetime
 from avito_parser_daily_script import avito_parse_start
+from datetime import datetime
+import logging
+from src.logcfg import logger_cfg
 from prepare_data import prepare_parsed_card, get_not_duplicated_items
 from src.database import Database
-import src.database
 from src import exceptions
 import json
 import os
@@ -16,6 +12,7 @@ logging.config.dictConfig(logger_cfg)
 log_error = logging.getLogger('log_error')
 log_info = logging.getLogger('log_info')
 DATE_NOW = datetime.now().date().strftime(format='%m-%d')
+
 
 def avito_etl():
     """Pipline avito parsing -> prepare raw data -> add prepared data to database"""
@@ -46,15 +43,14 @@ def avito_etl():
     except exceptions.prepare_data_failed as err:
         log_error.exception(err)
     finally:
-        pass
         prepared_df.to_json(f"../../files/process/prepared_items_df_{DATE_NOW}.json", force_ascii=False, indent=4)
         prepared_df.to_csv(f"../../files/process/prepared_items_df_{DATE_NOW}.csv", index=False, encoding='utf-8-sig')
 
-    # Add parsed items to database and delete duplicates
+    # Add parsed items to database and check if items exists in db
     try:
         not_duplicated_items = get_not_duplicated_items(df=prepared_df, db_name=db)
         db.add_parsed_items(column_values=not_duplicated_items)
-        log_info.info('PREPARED DATA ADDED TO DATABASE')
+        log_info.info(f'{len(not_duplicated_items)} ITEMS HAVE BEEN ADDED TO DATABASE')
     except exceptions.db_data_transfer_failed as err:
         log_error.exception(err)
 

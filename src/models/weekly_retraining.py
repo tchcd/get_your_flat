@@ -1,15 +1,15 @@
-# Weekly retraining catboost model on all data from database
-
-# Берем все объекты из датасета
-# Применяем формулу для пересчета рейтинга
-# Учим модель
-# Сохраняем модель как last_path
-from src.database import Database
 from catboost import CatBoostRegressor
-from sklearn.model_selection import train_test_split
-import pickle
 from datetime import datetime
+import logging
+import pickle
+from sklearn.model_selection import train_test_split
+from src.database import Database
+from src.logcfg import logger_cfg
+from src import exceptions
 
+logging.config.dictConfig(logger_cfg)
+log_error = logging.getLogger('log_error')
+log_info = logging.getLogger('log_info')
 DATE_NOW = datetime.now().date().strftime(format='%m-%d')
 
 
@@ -141,10 +141,14 @@ def evaluation(df):
 
 
 def prepare_training_dataset(df):
-    X = df.drop('rating', axis=1)
-    y = df['rating']
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=15)
-    cat_features = [df.columns.get_loc(col) for col in df.select_dtypes(include=object).columns]
+    try:
+        X = df.drop('rating', axis=1)
+        y = df['rating']
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=15)
+        cat_features = [df.columns.get_loc(col) for col in df.select_dtypes(include=object).columns]
+    except:
+        raise exceptions.prepare_model_failed
+
     return X_train, X_test, y_train, y_test, cat_features
 
 
@@ -155,15 +159,29 @@ def save_model(model, output_path):
 def weekly_retraining_model():
     db = Database()
     all_items = db.get_all_items()
-    all_items['rating'] = all_items.apply(evaluation, axis=1)
 
-    X_train, X_test, y_train, y_test, cat_features = prepare_training_dataset(all_items)
+    try:
+        all_items['rating'] = all_items.apply(evaluation, axis=1)
+        log_info.info("EQUATION HAS BEEN APPLIED")
+    except exceptions.prepare_model_failed as err:
+        log_error.exception(err)
 
-    model = CatBoostRegressor(learning_rate=0.05, iterations=5000, early_stopping_rounds=200)
-    model.fit(X_train, y_train, eval_set=(X_test, y_test), cat_features=cat_features)
+    try:
+        X_train, X_test, y_train, y_test, cat_features = prepare_training_dataset(all_items)
+        log_info.info("TRAIN/TEST HAS BEEN APPLIED")
+    except exceptions.prepare_model_failed as err:
+        log_error.exception(err)
 
-    save_model(model, "../../models/cb_last.sav")
-    save_model(model, f"../../models/cb_last{DATE_NOW}_backup.sav")
+    try:
+        model = CatBoostRegressor(learning_rate=0.05, iterations=5000, early_stopping_rounds=200)
+        model.fit(X_train, y_train, eval_set=(X_test, y_test), cat_features=cat_features)
+
+        save_model(model, "../../models/cb_last.sav")
+        save_model(model, f"../../models/cb_last{DATE_NOW}_backup.sav")    # Здесь MLflow сохраняет бекап и параметры
+
+        log_info.info("MODEL HAS BEEN TRAINED AND SAVED")
+    except exceptions.prepare_model_failed as err:
+        log_error.exception(err)
 
 
 if __name__ == "__main__":
