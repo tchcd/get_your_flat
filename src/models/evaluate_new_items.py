@@ -11,11 +11,14 @@ log_error = logging.getLogger('log_error')
 log_info = logging.getLogger('log_info')
 
 PATH_TO_LAST_MODEL = '../../models/cb_last.sav'
+PATH_TO_INIT_MODEL = '../../models/cb_init.sav'
 
 if os.path.exists(PATH_TO_LAST_MODEL):
     MODEL_PATH = PATH_TO_LAST_MODEL
+    log_info.info(f'LAST MODEL SELECTED')
 else:
-    MODEL_PATH = PATH_TO_LAST_MODEL
+    MODEL_PATH = PATH_TO_INIT_MODEL
+    log_info.info(f'INIT MODEL SELECTED')
 
 MODEL = pickle.load(open(MODEL_PATH, "rb"))
 COLUMNS = MODEL.feature_names_
