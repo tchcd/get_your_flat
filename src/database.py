@@ -1,6 +1,14 @@
 import sqlite3
 import pandas as pd
 from src import exceptions
+from typing import NamedTuple
+
+
+class TopFlat(NamedTuple):
+    link: str
+    price: int
+    subway: str
+    item_id: int
 
 
 class Database:
@@ -28,7 +36,7 @@ class Database:
                 cur_floor INTEGER,      cnt_floors INTEGER,
                 shown INTEGER )"""
         self.conn.execute(query)
-        #self.cursor.executescript(query)  # recreated table for test
+        # self.cursor.executescript(query)  # recreated table for test
         self.conn.commit()
 
     def add_parsed_items(self, column_values: pd.DataFrame, table: str = "items"):
@@ -43,21 +51,22 @@ class Database:
         except:
             raise exceptions.db_data_transfer_failed('PARSED DATA HAS NOT BEEN ADDED TO DATABASE')
 
-    def get_top_item(self):
-        """Get top item from database and send it to tg"""
+    def get_top_item(self) -> TopFlat:
+        """Get top item from database"""
 
-        query = """SELECT t.link FROM items t
+        query = """SELECT t.link, t.price, t.subway, t.id
+                FROM items t
                 WHERE t.shown is Null
                 ORDER BY t.rating DESC
                 LIMIT 1"""
         self.cursor.execute(query)
-        result = self.cursor.fetchall()
-        return [x[0] for x in result]  # Убрать x
+        result = self.cursor.fetchone()
+        return TopFlat(link=result[0], price=result[1], subway=result[2], item_id=result[3])
 
-    def update_shown_cards(self, links, table="items"):
+    def update_shown_item(self, item_id, table="items"):
         query = f"""UPDATE {table}
                 SET shown = 1
-                WHERE link in {tuple(links)}"""
+                WHERE id = {item_id}"""
         self.cursor.execute(query)
         self.conn.commit()
 

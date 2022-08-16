@@ -17,7 +17,7 @@ log_error = logging.getLogger('log_error')
 log_info = logging.getLogger('log_info')
 
 RAND_TIME = random.uniform(1, 2.5)
-MAX_URL_RANGE = 10  # How many urls page we take for parsing at all
+MAX_URL_RANGE = 5  # How many urls page we take for parsing at all
 LINKS_ON_PAGE = 55  # How many object on page we take now(for debug, true value == 55)
 
 
@@ -155,7 +155,7 @@ class AvitoParser:
         """Start parsing from first page to given "MAX_URL_LINKS" page"""
 
         for page_url in pages:
-            log_info.info(f"CURRENT PAGE {page_url}")
+            log_info.info(f"CURRENT PAGE: {page_url}")
             self.driver.get(page_url)
             time.sleep(RAND_TIME)
 

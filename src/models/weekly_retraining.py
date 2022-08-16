@@ -11,7 +11,8 @@ logging.config.dictConfig(logger_cfg)
 log_error = logging.getLogger('log_error')
 log_info = logging.getLogger('log_info')
 DATE_NOW = datetime.now().date().strftime(format='%m-%d')
-
+COLUMNS = ['rating', 'price', 'sqmeter_price', 'subway', 'minutes_to_subway', 'rooms', 'total_area',
+           'balcony', 'type_of_renovation', 'type_of_house', 'cur_floor', 'cnt_floors']
 
 def evaluation(df):
     cnt = 0
@@ -142,10 +143,11 @@ def evaluation(df):
 
 def prepare_training_dataset(df):
     try:
+        df = df[COLUMNS].copy()
         X = df.drop('rating', axis=1)
         y = df['rating']
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=15)
-        cat_features = [df.columns.get_loc(col) for col in df.select_dtypes(include=object).columns]
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=20)
+        cat_features = [X_train.columns.get_loc(col) for col in X_train.select_dtypes(include=object).columns]
     except:
         raise exceptions.prepare_model_failed
 
@@ -163,25 +165,31 @@ def weekly_retraining_model():
     try:
         all_items['rating'] = all_items.apply(evaluation, axis=1)
         log_info.info("EQUATION HAS BEEN APPLIED")
-    except exceptions.prepare_model_failed as err:
-        log_error.exception(err)
+    except:
+        log_error.error('EQUATION HAS NOT BEEN APPLIED!')
+        raise exceptions.prepare_model_failed
+
 
     try:
         X_train, X_test, y_train, y_test, cat_features = prepare_training_dataset(all_items)
         log_info.info("TRAIN/TEST HAS BEEN APPLIED")
-    except exceptions.prepare_model_failed as err:
-        log_error.exception(err)
+    except:
+        log_error.error('TRAIN/TEST HAS NOT BEEN SPLIT!')
+        raise exceptions.prepare_model_failed
 
     try:
         model = CatBoostRegressor(learning_rate=0.05, iterations=5000, early_stopping_rounds=200)
         model.fit(X_train, y_train, eval_set=(X_test, y_test), cat_features=cat_features)
-
         save_model(model, "../../models/cb_last.sav")
         save_model(model, f"../../models/cb_last{DATE_NOW}_backup.sav")    # Здесь MLflow сохраняет бекап и параметры
 
         log_info.info("MODEL HAS BEEN TRAINED AND SAVED")
-    except exceptions.prepare_model_failed as err:
-        log_error.exception(err)
+        # print(X_train.columns)
+        # print(cat_features)
+
+    except:
+        log_error.error('MODEL HAS NOT BEEN TRAINED!')
+        raise exceptions.prepare_model_failed
 
 
 if __name__ == "__main__":
