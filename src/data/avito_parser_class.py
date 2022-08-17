@@ -23,6 +23,7 @@ LINKS_ON_PAGE = 55  # How many object on page we take now(for debug, true value 
 
 class AvitoParser:
     def __init__(self, headless=False):
+        """Create and launch selenium webdriver object"""
         self.url = "https://www.avito.ru/sankt-peterburg/kvartiry/prodam/vtorichka"
         self.options = webdriver.ChromeOptions()
         self.options.add_argument(
@@ -41,6 +42,7 @@ class AvitoParser:
         self.storage = []
 
     def auth_avito(self):
+        """Avito user authentication"""
         self.driver.get(self.url)
         time.sleep(RAND_TIME)
         for cookie in pickle.load(open(r"C:\Users\q\IdeaProjects\Python3\flatblet\session", "rb")):
@@ -50,6 +52,7 @@ class AvitoParser:
         return self
 
     def _handling_properties(self):
+        """Collect flat listing properties"""
         properties_list = {}
         try:
             # Get subway
@@ -122,7 +125,7 @@ class AvitoParser:
         return properties_list
 
     def get_filters(self):
-        """Add filters on the homepage"""
+        """Add filters for search on the avito homepage"""
         self.driver.find_elements(By.CLASS_NAME, "input-layout-stick-before-xYZY2")[0].send_keys("10000000" + Keys.ENTER)
         time.sleep(RAND_TIME)
         self.driver.find_elements(
