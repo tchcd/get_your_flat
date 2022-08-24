@@ -18,7 +18,6 @@ log_info = logging.getLogger('log_info')
 
 RAND_TIME = random.uniform(1, 2.5)
 MAX_URL_RANGE = 15  # How many urls page we take for parsing at all
-LINKS_ON_PAGE = 55  # How many object on page we take now(for debug, true value == 55)
 
 
 class AvitoParser:
@@ -89,10 +88,9 @@ class AvitoParser:
             time.sleep(RAND_TIME)
 
             # Get time
-            times = self.driver.find_element(
-                By.CLASS_NAME, "style-item-metadata-date-1y5w6"
-            )
-            times = times.text.lower().split()
+            times = self.driver.find_elements(
+                By.CLASS_NAME, "style-item-footer-3uXQz"
+            ).text
             properties_list["time"] = times
             time.sleep(RAND_TIME)
 
@@ -119,7 +117,7 @@ class AvitoParser:
             link = f"{self.driver.current_url}"
             properties_list["link"] = link if link else None
             time.sleep(RAND_TIME)
-        except:
+        except:                             # ошибка когда мы хотим обратится к объекту а его нет. Нужно ли ловить?
             log_info.info("EXCEPT HANDLING PROPERTIES")
 
         return properties_list
@@ -156,7 +154,6 @@ class AvitoParser:
 
     def _parse_objects(self, pages: list) -> None:
         """Start parsing from first page to given "MAX_URL_LINKS" page"""
-
         for page_url in pages:
             log_info.info(f"CURRENT PAGE: {page_url}")
             self.driver.get(page_url)
@@ -166,7 +163,7 @@ class AvitoParser:
             links = self.driver.find_elements(By.CLASS_NAME, "iva-item-root-_lk9K")
             time.sleep(RAND_TIME)
 
-            for obj in range(len(links))[:LINKS_ON_PAGE]:   #LINKS_ON_PAGE - number of objects per page
+            for obj in range(len(links)):
                 log_info.info(F"COLLECTING {obj} LINK")
                 try:
                     links[obj].click()
@@ -184,7 +181,7 @@ class AvitoParser:
                 except:
                     log_info.info(f"{obj} LINK WAS NOT COLLECTED {links[obj]}")
 
-    def run_parser(self, count_url: int = MAX_URL_RANGE) -> list:
+    def start_parser(self, count_url: int = MAX_URL_RANGE) -> list:
         """
         Run the parser
 
