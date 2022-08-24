@@ -137,7 +137,7 @@ def prepare_parsed_card(raw_data: list) -> pd.DataFrame:
                  "Количество комнат", "Общая площадь", "Этаж"]
     raw_data = [valid for valid in raw_data if not need_keys - valid.keys()]  # check if needed keys in raw items exists
 
-    try:
+
         log_info.info('START PARSED DATA PREPARING')
         df = _prepare_dataframe(raw_data)
         df = _prepare_time(df)
@@ -150,8 +150,8 @@ def prepare_parsed_card(raw_data: list) -> pd.DataFrame:
         df["rooms"].astype(int)
         df = df.drop_duplicates('link')
         log_info.info('STOP PARSED DATA PREPARING')
-    except:
-        raise exceptions.prepare_data_failed('DATA PREPARATION FAILED')
+    #except ValueError as err:
+    #    raise exceptions.prepare_data_failed('DATA PREPARATION FAILED')
 
     return df
 

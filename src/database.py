@@ -1,3 +1,4 @@
+import os
 import sqlite3
 import pandas as pd
 from src import exceptions
@@ -12,7 +13,8 @@ class TopFlat(NamedTuple):
 
 
 class Database:
-    def __init__(self, dbname="../../flats.db"):
+    def __init__(self, dbname=PATH_TO_DB):
+        os.getenv()
         self.dbname = dbname
         try:
             self.conn = sqlite3.connect(dbname)

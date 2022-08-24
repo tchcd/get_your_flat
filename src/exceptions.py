@@ -1,4 +1,4 @@
-class prepare_data_failed(Exception):
+class PrepareDataFailed(Exception):
     pass
 
 

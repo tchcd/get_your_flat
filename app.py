@@ -8,7 +8,7 @@ from src.database import Database
 
 app = Flask(__name__)
 
-
+# НАКОСЯЧИЛ С ПАПКАМИ НАДО ОСТАВИТЬ ПРОЦЕССИНГИ
 def get_from_env(key):
     dotenv_path = join(dirname(__file__), ".env")
     load_dotenv(dotenv_path)
@@ -40,7 +40,7 @@ def parse_top_item():
 @app.route("/", methods=["POST"])
 def main():
     """Send listing to telegram"""
-    link, price, subway, item_id = parse_top_item()
+    link, price, subway, _ = parse_top_item()
 
     chat_id = flask_request.json["message"]["chat"]["id"]
 

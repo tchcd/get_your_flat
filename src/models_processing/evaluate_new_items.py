@@ -24,25 +24,25 @@ MODEL = pickle.load(open(MODEL_PATH, "rb"))
 COLUMNS = MODEL.feature_names_
 
 
-def get_daily_predict(model) -> pd.DataFrame:                   # This func need to refactor
+def get_daily_predict(model, db) -> pd.DataFrame:                   # This func need to refactor
     """
     Predict not evaluated items after parsing function.
     Get not estimated items from db -> predict rating for them -> update rating in db.
     """
     try:
-        db = Database()
         df = db.get_not_estimated_items()
         df["rating"] = model.predict(df[COLUMNS])
         db.update_estimated_items(df)
         log_info.info(f'{df.shape[0]} NEW ITEMS HAS BEEN EVALUATED')
-    except:
+    except exceptions.evaluate_data_failed:
         log_error.error('WORK PREDICTION MODEL HAS BEEN FAILED')
-        raise exceptions.evaluate_data_failed
+        raise exceptions.evaluate_data_failed()
 
     return df
 
 
 if __name__ == "__main__":
-    get_daily_predict(MODEL)
+    db = Database()
+    get_daily_predict(MODEL, db)
 
 # Проблема в том, что переобученая модель предсказывает только итемы с НаН, в том числе из за апдейта БД где rating is Null

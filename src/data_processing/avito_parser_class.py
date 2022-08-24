@@ -17,7 +17,7 @@ log_error = logging.getLogger('log_error')
 log_info = logging.getLogger('log_info')
 
 RAND_TIME = random.uniform(1, 2.5)
-MAX_URL_RANGE = 5  # How many urls page we take for parsing at all
+MAX_URL_RANGE = 15  # How many urls page we take for parsing at all
 LINKS_ON_PAGE = 55  # How many object on page we take now(for debug, true value == 55)
 
 
@@ -41,7 +41,7 @@ class AvitoParser:
         self.rand_time = RAND_TIME
         self.storage = []
 
-    def auth_avito(self):
+    def _auth_avito(self):
         """Avito user authentication"""
         self.driver.get(self.url)
         time.sleep(RAND_TIME)
@@ -124,7 +124,7 @@ class AvitoParser:
 
         return properties_list
 
-    def get_filters(self):
+    def _get_filters(self):
         """Add filters for search on the avito homepage"""
         self.driver.find_elements(By.CLASS_NAME, "input-layout-stick-before-xYZY2")[0].send_keys("10000000" + Keys.ENTER)
         time.sleep(RAND_TIME)
@@ -144,9 +144,9 @@ class AvitoParser:
         select.select_by_index(3)
         return self
 
-    def pages_generation(self):
+    def _pages_generation(self, count_url):
         """ Generation correct link-path for parser"""
-        page_range = [i for i in range(1, MAX_URL_RANGE+1)]
+        page_range = [i for i in range(1, count_url+1)]
         cur_page = self.driver.current_url
         pages = []
         for num in page_range:
@@ -154,7 +154,7 @@ class AvitoParser:
         log_info.info(f'ALL READY PAGES - {pages}')
         return pages
 
-    def parse_objects(self, pages: list) -> None:
+    def _parse_objects(self, pages: list) -> None:
         """Start parsing from first page to given "MAX_URL_LINKS" page"""
 
         for page_url in pages:
@@ -166,7 +166,7 @@ class AvitoParser:
             links = self.driver.find_elements(By.CLASS_NAME, "iva-item-root-_lk9K")
             time.sleep(RAND_TIME)
 
-            for obj in range(len(links))[:LINKS_ON_PAGE]:
+            for obj in range(len(links))[:LINKS_ON_PAGE]:   #LINKS_ON_PAGE - number of objects per page
                 log_info.info(F"COLLECTING {obj} LINK")
                 try:
                     links[obj].click()
@@ -183,6 +183,20 @@ class AvitoParser:
                     log_info.info(f"{obj} LINK HAS BEEN COLLECTED")
                 except:
                     log_info.info(f"{obj} LINK WAS NOT COLLECTED {links[obj]}")
+
+    def run_parser(self, count_url: int = MAX_URL_RANGE) -> list:
+        """
+        Run the parser
+
+        :param count_url: number of generated pages for the parser
+        :return: list of dictionaries with listing objects
+        """
+        self._auth_avito()
+        self._get_filters()
+        pages_to_parse = self._pages_generation(count_url=count_url)
+        self._parse_objects(pages_to_parse)
+
+        return self.storage
 
 
 
