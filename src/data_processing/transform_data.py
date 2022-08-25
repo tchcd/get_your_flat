@@ -5,7 +5,7 @@ from src.logcfg import logger_cfg
 import pandas as pd
 from datetime import date, timedelta, datetime
 import dataenforce
-from config import DATE_NOW, RAW_DATA_PATH
+from cfg import RAW_DATA_PATH_JSON, TRANSFORMED_DATA_PATH_CSV
 
 logging.config.dictConfig(logger_cfg)
 log_error = logging.getLogger('log_error')
@@ -154,18 +154,22 @@ class DataTransformation:
         return df
 
 
-class SaveJson:
+class SaveToJson:
     def __init__(self, data: list) -> None:
         self.data = data
 
     def save(self):
-        with open(f"../../files/process/raw_parsed_items_{DATE_NOW}.json", "w", encoding="utf-8") as file:
+        with open(RAW_DATA_PATH_JSON, "w", encoding="utf-8") as file:
             json.dump(self.data, file, indent=4, ensure_ascii=False)
 
 
-class SaveCsv:
+class SaveToCsv:
     def __init__(self, df: pd.DataFrame) -> None:
-        self.df = df
+        self.dataframe = df
 
     def save(self):
-        self.df.to_csv(f"../../files/process/prepared_items_df_{DATE_NOW}.csv", index=False, encoding='utf-8-sig')
+        self.dataframe.to_csv(TRANSFORMED_DATA_PATH_CSV, index=False, encoding='utf-8-sig')
+
+
+if __name__ == '__main__':
+    pass

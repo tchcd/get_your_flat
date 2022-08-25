@@ -8,14 +8,15 @@ from src.database import Database
 
 app = Flask(__name__)
 
-# НАКОСЯЧИЛ С ПАПКАМИ НАДО ОСТАВИТЬ ПРОЦЕССИНГИ
+
 def get_from_env(key):
     dotenv_path = join(dirname(__file__), ".env")
     load_dotenv(dotenv_path)
-    return os.environ.get(key)  # token receiving
+    return os.environ.get(key)
 
 
 def tg_send_item(chat_id, text):
+    """Sends item to telegram"""
     method = "sendMessage"
     token = get_from_env("TELEGRAM_BOT_TOKEN")
     url = f"https://api.telegram.org/bot{token}/{method}"
@@ -24,7 +25,8 @@ def tg_send_item(chat_id, text):
 
 
 def parse_top_item():
-    db = Database(dbname='flats.db')
+    """Parse required features from db top item"""
+    db = Database()
 
     top_flat_link = db.get_top_item()
     link = top_flat_link.link

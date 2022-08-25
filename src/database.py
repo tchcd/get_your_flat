@@ -3,6 +3,7 @@ import sqlite3
 import pandas as pd
 from src import exceptions
 from typing import NamedTuple
+from cfg import PATH_TO_DB
 
 
 class TopFlat(NamedTuple):
@@ -13,15 +14,13 @@ class TopFlat(NamedTuple):
 
 
 class Database:
-    def __init__(self, dbname=PATH_TO_DB):
-        os.getenv()
-        self.dbname = dbname
+    def __init__(self):
+        self.dbname = PATH_TO_DB
         try:
-            self.conn = sqlite3.connect(dbname)
+            self.conn = sqlite3.connect(self.dbname)
         except:
             raise exceptions.db_connect_failed('db connection failed')
         self.cursor = self.conn.cursor()
-        self.PREPARED_JSON = "prepared_items_df.json"
 
     def setup(self):
         query = """

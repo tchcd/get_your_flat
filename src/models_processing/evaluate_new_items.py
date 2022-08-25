@@ -5,13 +5,11 @@ from src import exceptions
 import os
 import logging
 from src.logcfg import logger_cfg
+from cfg import PATH_TO_INIT_MODEL, PATH_TO_LAST_MODEL
 
 logging.config.dictConfig(logger_cfg)
 log_error = logging.getLogger('log_error')
 log_info = logging.getLogger('log_info')
-
-PATH_TO_LAST_MODEL = '../../models/cb_last.sav'
-PATH_TO_INIT_MODEL = '../../models/cb_init.sav'
 
 if os.path.exists(PATH_TO_LAST_MODEL):
     MODEL_PATH = PATH_TO_LAST_MODEL

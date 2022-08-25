@@ -6,13 +6,12 @@ from sklearn.model_selection import train_test_split
 from src.database import Database
 from src.logcfg import logger_cfg
 from src import exceptions
+from cfg import PATH_TO_SAVE_MODEL, COLUMNS, MODEL_PARAMS
 
 logging.config.dictConfig(logger_cfg)
 log_error = logging.getLogger('log_error')
 log_info = logging.getLogger('log_info')
-DATE_NOW = datetime.now().date().strftime(format='%m-%d')
-COLUMNS = ['rating', 'price', 'sqmeter_price', 'subway', 'minutes_to_subway', 'rooms', 'total_area',
-           'balcony', 'type_of_renovation', 'type_of_house', 'cur_floor', 'cnt_floors']
+
 
 def evaluation(df):
     cnt = 0
@@ -178,10 +177,10 @@ def weekly_retraining_model():
         raise exceptions.prepare_model_failed
 
     try:
-        model = CatBoostRegressor(learning_rate=0.05, iterations=5000, early_stopping_rounds=200)
+        model = CatBoostRegressor(**MODEL_PARAMS)
         model.fit(X_train, y_train, eval_set=(X_test, y_test), cat_features=cat_features)
-        save_model(model, "../../models/cb_last.sav")
-        save_model(model, f"../../models/cb_last{DATE_NOW}_backup.sav")    # Здесь MLflow сохраняет бекап и параметры
+        save_model(model, PATH_TO_SAVE_MODEL)
+        # Здесь MLflow сохраняет бекап и параметры
 
         log_info.info("MODEL HAS BEEN TRAINED AND SAVED")
         # print(X_train.columns)

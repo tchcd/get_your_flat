@@ -3,7 +3,7 @@ from avito_parser_class import AvitoParser
 from datetime import datetime
 import logging
 from src.logcfg import logger_cfg
-from transform_data import DataTransformation, SaveJson, SaveCsv
+from transform_data import DataTransformation, SaveToJson, SaveToCsv
 from src.database import Database
 from src import exceptions
 
@@ -13,17 +13,17 @@ log_info = logging.getLogger('log_info')
 
 
 def avito_etl(database):
-    """Pipline avito parsing -> prepare raw data -> add prepared data to database"""
+    """Pipeline avito parsing -> prepare raw data -> add prepared data to database"""
     try:
         log_info.info("PARSING HAS BEEN STARTED")
-        data = AvitoParser(headless=True).run_parser(count_url=15)
+        data = AvitoParser(headless=True).start_parser(count_url=15)
         log_info.info("PARSING HAS BEEN SUCCESSFULLY COMPLETED")
-        SaveJson.save(data)
+        SaveToJson(data).save()
 
         log_info.info("DATA PREPARING HAS BEEN STARTED")
         transformed_df = DataTransformation.start_preparing(data)
         log_info.info("PARSED DATA HAS BEEN SUCCESSFULLY PREPARED")
-        SaveCsv.save(transformed_df)
+        SaveToCsv(transformed_df).save()
 
         database.add_parsed_items(column_values=transformed_df)
         log_info.info(f"{len(transformed_df)} ITEMS HAS BEEN ADDED TO DATABASE")
