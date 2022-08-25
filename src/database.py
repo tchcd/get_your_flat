@@ -22,24 +22,6 @@ class Database:
             raise exceptions.db_connect_failed('db connection failed')
         self.cursor = self.conn.cursor()
 
-    def setup(self):
-        query = """
-                --DROP TABLE IF EXISTS items;
-                CREATE TABLE IF NOT EXISTS items(
-                id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                rating REAL,            time TEXT, 
-                price INTEGER,          sqmeter_price INTEGER,
-                address TEXT,           subway TEXT,            
-                rooms INTEGER,          minutes_to_subway INTEGER,
-                total_area REAL,
-                balcony TEXT,           type_of_renovation TEXT,
-                type_of_house TEXT,     link TEXT,
-                cur_floor INTEGER,      cnt_floors INTEGER,
-                shown INTEGER )"""
-        self.conn.execute(query)
-        # self.cursor.executescript(query)  # recreated table for test
-        self.conn.commit()
-
     def add_parsed_items(self, column_values: pd.DataFrame, table: str = "items"):
         columns = ", ".join(column_values.columns)
         values = [tuple(value) for value in column_values.values]

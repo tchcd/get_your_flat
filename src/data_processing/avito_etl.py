@@ -1,6 +1,4 @@
-from avito_parser_daily_script import avito_parse_start
 from avito_parser_class import AvitoParser
-from datetime import datetime
 import logging
 from src.logcfg import logger_cfg
 from transform_data import DataTransformation, SaveToJson, SaveToCsv
