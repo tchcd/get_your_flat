@@ -1,17 +1,19 @@
 # Это модуль подготовки данных после получения из пасрсера
 import logging
+import json
 from src.logcfg import logger_cfg
 import pandas as pd
 from datetime import date, timedelta, datetime
 import dataenforce
+from config import DATE_NOW, RAW_DATA_PATH
 
 logging.config.dictConfig(logger_cfg)
 log_error = logging.getLogger('log_error')
 log_info = logging.getLogger('log_info')
 
 
-class DataPreparation:
-    #def __init__(self, raw_data):
+class DataTransformation:
+    # def __init__(self, raw_data):
     #    self.data = raw_data
 
     def _create_df(self, raw_data: list) -> pd.DataFrame:
@@ -58,7 +60,7 @@ class DataPreparation:
 
     @staticmethod
     def _time_changer(time: list) -> str:
-        """This function converts time values and uses them in the _prepare_time func"""
+        """This function converts time values and uses them in the _transform_time func"""
 
         time = time.split('·')
         all_months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля',
@@ -78,23 +80,23 @@ class DataPreparation:
             year = str(datetime.now().year)
             return '-'.join([year, month, day])
 
-    def _prepare_time(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _transform_time(self, df: pd.DataFrame) -> pd.DataFrame:
         """Makes correct time column"""
         df["time"] = df["time"].apply(lambda x: self._time_changer(x))
         return df
 
-    def _prepare_subway(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _transfrom_subway(self, df: pd.DataFrame) -> pd.DataFrame:
         """Remove NaN-values from subway and distance_to_subway columns, and makes a correct distance column"""
         df = df[~df["subway"].isna()]
         df = df[~df["minutes_to_subway"].isna()]
         return df
 
-    def _prepare_area(self, df):
+    def _transform_area(self, df):
         """Makes correct area column"""
         df["total_area"] = df["total_area"].apply(lambda x: str(x).split()[0].split(".")[0]).astype('float')
         return df
 
-    def _prepare_floors(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _transform_floors(self, df: pd.DataFrame) -> pd.DataFrame:
         """Makes correct floors column"""
         df["floor"] = df["floor"].apply(lambda x: str(x).split())
         df["cur_floor"] = df["floor"].apply(lambda x: x[0]).astype(int)
@@ -138,10 +140,10 @@ class DataPreparation:
         log_info.info('START PARSED DATA PREPARING')
         valid_items = self._check_valid_columns(raw_data)
         df = self._create_df(valid_items)
-        df = self._prepare_time(df)
-        df = self._prepare_subway(df)
-        df = self._prepare_area(df)
-        df = self._prepare_floors(df)
+        df = self._transform_time(df)
+        df = self._transfrom_subway(df)
+        df = self._transform_area(df)
+        df = self._transform_floors(df)
         df = self._drop_columns(df)
         df = self._fill_nan(df)
         df['sqmeter_price'] = df['price'] // df['total_area']
@@ -150,3 +152,20 @@ class DataPreparation:
         log_info.info('STOP PARSED DATA PREPARING')
 
         return df
+
+
+class SaveJson:
+    def __init__(self, data: list) -> None:
+        self.data = data
+
+    def save(self):
+        with open(f"../../files/process/raw_parsed_items_{DATE_NOW}.json", "w", encoding="utf-8") as file:
+            json.dump(self.data, file, indent=4, ensure_ascii=False)
+
+
+class SaveCsv:
+    def __init__(self, df: pd.DataFrame) -> None:
+        self.df = df
+
+    def save(self):
+        self.df.to_csv(f"../../files/process/prepared_items_df_{DATE_NOW}.csv", index=False, encoding='utf-8-sig')
