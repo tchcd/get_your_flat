@@ -3,9 +3,8 @@ import sqlite3
 
 
 # Initial setup database
-def db_initialize():
-    dbname = PATH_TO_DB
-    conn = sqlite3.connect(dbname)
+def db_initialize(path_to_db):
+    conn = sqlite3.connect(path_to_db)
     cursor = conn.cursor()
 
     query = """
@@ -18,13 +17,17 @@ def db_initialize():
             rooms INTEGER,          minutes_to_subway INTEGER,
             total_area REAL,
             balcony TEXT,           type_of_renovation TEXT,
-            type_of_house TEXT,     link TEXT,
+            type_of_house TEXT,     link TEXT UNIQUE ON CONFLICT REPLACE,
             cur_floor INTEGER,      cnt_floors INTEGER,
-            shown INTEGER )"""
+            shown INTEGER);"""
     conn.execute(query)
-    cursor.executescript(query)  # recreated table for test
+    #cursor.executescript(query)  # recreated table for test
     conn.commit()
 
 
 if __name__ == "__main__":
-    db_initialize()
+    db_initialize(PATH_TO_DB)
+
+
+
+

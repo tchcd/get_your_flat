@@ -22,7 +22,7 @@ MODEL = pickle.load(open(MODEL_PATH, "rb"))
 COLUMNS = MODEL.feature_names_
 
 
-def get_daily_predict(model, db) -> pd.DataFrame:                   # This func need to refactor
+def get_daily_predict(model, db) -> pd.DataFrame:
     """
     Predict not evaluated items after parsing function.
     Get not estimated items from db -> predict rating for them -> update rating in db.
@@ -31,12 +31,12 @@ def get_daily_predict(model, db) -> pd.DataFrame:                   # This func 
         df = db.get_not_estimated_items()
         df["rating"] = model.predict(df[COLUMNS])
         db.update_estimated_items(df)
+    except Exception as err:
+        log_error.error('WORK PREDICTION MODEL HAS BEEN FAILED', err, exc_info=True)
+        raise
+    else:
         log_info.info(f'{df.shape[0]} NEW ITEMS HAS BEEN EVALUATED')
-    except exceptions.evaluate_data_failed:
-        log_error.error('WORK PREDICTION MODEL HAS BEEN FAILED')
-        raise exceptions.evaluate_data_failed()
-
-    return df
+        return df
 
 
 if __name__ == "__main__":

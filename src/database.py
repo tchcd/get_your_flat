@@ -100,3 +100,8 @@ class Database:
                 """
         self.cursor.execute(query)
         self.conn.commit()
+
+
+#
+# if __name__ == "__main__":
+#     pass

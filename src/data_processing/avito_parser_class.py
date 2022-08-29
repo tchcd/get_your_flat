@@ -52,15 +52,17 @@ class AvitoParser:
 
     def _handling_properties(self):
         """Collect flat listing properties"""
-        properties_list = {}
         try:
+            properties_list = {}
             # Get subway
+            log_info.info("GET SUBWAY")
             properties_list["subway"] = self.driver.find_element(
                 By.XPATH,
                 """/html/body/div[3]/div[1]/div/div/div[2]/div[2]/div[1]/div[2]/div[2]/div/div[2]/div[1]
                 /div/div/span/span[1]/span[2]""").text
 
             # Get distance
+            log_info.info("GET DISTANCE")
             distance = self.driver.find_elements(
                 By.CLASS_NAME, "style-item-address-georeferences-item-18pFt"
             )
@@ -70,6 +72,7 @@ class AvitoParser:
             time.sleep(RAND_TIME)
 
             # Get price
+            log_info.info("GET PRICE")
             price = int(
                 self.driver.find_elements(
                     By.CLASS_NAME, "style-price-value-main-1P7DJ"
@@ -81,6 +84,7 @@ class AvitoParser:
             time.sleep(RAND_TIME)
 
             # Get address
+            log_info.info("GET ADDRESS")
             address = self.driver.find_element(
                 By.CLASS_NAME, "style-item-address__string-3Ct0s"
             ).text
@@ -88,13 +92,15 @@ class AvitoParser:
             time.sleep(RAND_TIME)
 
             # Get time
-            times = self.driver.find_elements(
+            log_info.info("GET TIME")
+            times = self.driver.find_element(
                 By.CLASS_NAME, "style-item-footer-3uXQz"
             ).text
             properties_list["time"] = times
             time.sleep(RAND_TIME)
 
             # Get properties about house
+            log_info.info("GET PROPERTIES")
             house = self.driver.find_elements(
                 By.CLASS_NAME, "style-item-params-list-3YJu7"
             )
@@ -105,6 +111,7 @@ class AvitoParser:
                     properties_list[column] = value.strip()
 
             # Get properties about flat
+            log_info.info("GET PROPERTIES2")
             flat = self.driver.find_elements(By.CLASS_NAME, "params-paramsList-2PiKQ")
             for items in flat:
                 flat_properties_list = items.text.split("\n")
@@ -114,13 +121,15 @@ class AvitoParser:
             time.sleep(RAND_TIME)
 
             # Get link
+            log_info.info("GET LINK")
             link = f"{self.driver.current_url}"
             properties_list["link"] = link if link else None
             time.sleep(RAND_TIME)
         except:                             # ошибка когда мы хотим обратится к объекту а его нет. Нужно ли ловить?
             log_info.info("EXCEPT HANDLING PROPERTIES")
-
-        return properties_list
+            return None
+        else:
+            return properties_list
 
     def _get_filters(self):
         """Add filters for search on the avito homepage"""
@@ -163,21 +172,19 @@ class AvitoParser:
             links = self.driver.find_elements(By.CLASS_NAME, "iva-item-root-_lk9K")
             time.sleep(RAND_TIME)
 
-            for obj in range(len(links)):
+            for obj in range(len(links))[:3]:
                 log_info.info(F"COLLECTING {obj} LINK")
                 try:
                     links[obj].click()
                     time.sleep(RAND_TIME)
                     self.driver.switch_to.window(self.driver.window_handles[1])
-                    data = (
-                        self._handling_properties()
-                    )  # Launch collection data from object
+                    data = self._handling_properties() # Start collection data from object
                     if data is not None:
                         self.storage.append(data)
+                        log_info.info(f"{obj} LINK HAS BEEN COLLECTED")
                     time.sleep(RAND_TIME)
                     self.driver.close()
                     self.driver.switch_to.window(self.driver.window_handles[0])
-                    log_info.info(f"{obj} LINK HAS BEEN COLLECTED")
                 except:
                     log_info.info(f"{obj} LINK WAS NOT COLLECTED {links[obj]}")
 

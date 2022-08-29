@@ -7,6 +7,10 @@ from datetime import date, timedelta, datetime
 import dataenforce
 from cfg import RAW_DATA_PATH_JSON, TRANSFORMED_DATA_PATH_CSV
 
+from test import raw
+from src.database import Database
+
+
 logging.config.dictConfig(logger_cfg)
 log_error = logging.getLogger('log_error')
 log_info = logging.getLogger('log_info')
@@ -62,19 +66,19 @@ class DataTransformation:
     def _time_changer(time: list) -> str:
         """This function converts time values and uses them in the _transform_time func"""
 
-        time = time.split('·')
+        time = time.split('·')[1]
         all_months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля',
                       'августа', 'сентября', 'октября', 'ноября', 'декабря']
 
-        if 'вчера' in time:
+        if 'вчера' in time.split():
             yesterday = date.today() - timedelta(days=1)
             return yesterday.strftime("%Y-%m-%d")
-        elif 'сегодня' in time:
+        elif 'сегодня' in time.split():
             yesterday = date.today() - timedelta(days=0)
             return yesterday.strftime("%Y-%m-%d")
         else:
-            day = time.text.lower().split('·')[1].strip().split()[:2][0]
-            month = str(all_months.index(time.text.lower().split('·')[1].strip().split()[:2][1]) + 1)
+            day = time.strip().split()[:2][0]
+            month = str(all_months.index(time.strip().split()[:2][1]) + 1)
             if len(month) == 1:
                 month = f"0{month}"
             year = str(datetime.now().year)
@@ -132,7 +136,7 @@ class DataTransformation:
                     not need_keys - valid.keys()]
         return raw_data
 
-    def start_preparing(self, raw_data: list) -> pd.DataFrame:
+    def start_transform(self, raw_data: list) -> pd.DataFrame:
         """Prepares clean dataframe from the raw data
         :param raw_data: list of dictionaries
         :return: cleaned Dataframe
@@ -172,4 +176,9 @@ class SaveToCsv:
 
 
 if __name__ == '__main__':
-    pass
+    db = Database()
+    db_item = pd.read_csv(r'C:\Users\q\Desktop\db_items.csv', sep=',', encoding='Windows-1252')
+    print(db_item)
+    #data = DataTransformation().start_transform(raw)
+    #db.add_parsed_items(column_values=data)
+    #log_info.info(f"{len(data)} ITEMS HAS BEEN ADDED TO DATABASE")

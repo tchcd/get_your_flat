@@ -184,12 +184,13 @@ class ModelRetraining:
             model.fit(X_train, y_train, eval_set=(X_val, y_val), cat_features=cat_features)
             metrics = self._get_model_score(y_test, model.predict(X_test))
             self._save_model(model, PATH_TO_SAVE_MODEL)
-            log_info.info("MODEL HAS BEEN TRAINED AND SAVED")
-            return metrics
             # Здесь MLflow сохраняет бекап и параметры
         except Exception as err:
             log_error.error('MODEL HAS NOT BEEN TRAINED!', err, exc_info=True)
             raise
+        else:
+            log_info.info("MODEL HAS BEEN TRAINED AND SAVED")
+            return metrics
 
 
 if __name__ == "__main__":

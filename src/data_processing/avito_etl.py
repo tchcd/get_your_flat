@@ -14,12 +14,12 @@ def avito_etl(database):
     """Pipeline avito parsing -> prepare raw data -> add prepared data to database"""
     try:
         log_info.info("PARSING HAS BEEN STARTED")
-        data = AvitoParser(headless=True).start_parser(count_url=15)
+        data = AvitoParser(headless=True).start_parser(count_url=3)
         log_info.info("PARSING HAS BEEN SUCCESSFULLY COMPLETED")
         SaveToJson(data).save()
 
         log_info.info("DATA PREPARING HAS BEEN STARTED")
-        transformed_df = DataTransformation.start_preparing(data)
+        transformed_df = DataTransformation().start_transform(data)
         log_info.info("PARSED DATA HAS BEEN SUCCESSFULLY PREPARED")
         SaveToCsv(transformed_df).save()
 
