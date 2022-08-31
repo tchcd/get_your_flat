@@ -20,6 +20,10 @@ PATH_TO_SAVE_MODEL = Path(MODELS_PATH) / 'cb_last.sav'
 PATH_TO_LAST_MODEL = Path(MODELS_PATH) / 'cb_last.sav'
 PATH_TO_INIT_MODEL = Path(MODELS_PATH) / 'cb_init.sav'
 
+# Logger paths
+ERRORS_LOG_FILE = Path(f"{MAIN_FOLDER}/logs") / 'errors.log'
+INFO_LOG_FILE = Path(f"{MAIN_FOLDER}/logs") / 'info.log'
+
 # Parser parameters
 URL_COUNT = 20
 

@@ -1,4 +1,5 @@
 import logging.config
+import cfg
 
 logger_cfg = {
     'version': 1,
@@ -24,7 +25,7 @@ logger_cfg = {
             'class': 'logging.FileHandler',
             'level': 'INFO',
             'formatter': 'base_formatter',
-            'filename': '../../logs/info.log',
+            'filename': cfg.INFO_LOG_FILE,
             'mode': 'a'
         },
         'console_error': {
@@ -37,21 +38,16 @@ logger_cfg = {
             'class': 'logging.FileHandler',
             'level': 'ERROR',
             'formatter': 'error_formatter',
-            'filename': '../../logs/errors.log',
+            'filename': cfg.ERRORS_LOG_FILE,
             'mode': 'a'
         },
 
     },
     'loggers': {
-        'log_info': {
+        'logger': {
             'level': 'INFO',
-            'handlers': ['console_info', 'file_info']
+            'handlers': ['console_info', 'file_info', 'console_error', 'file_error']
         },
-        'log_error': {
-            'level': 'ERROR',
-            'handlers': ['console_error', 'file_error']
-        },
-
     }
     # 'filters': {}
 }

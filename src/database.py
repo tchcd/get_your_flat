@@ -1,9 +1,8 @@
-import os
 import sqlite3
 import pandas as pd
 from src import exceptions
 from typing import NamedTuple
-from cfg import PATH_TO_DB
+import cfg
 
 
 class TopFlat(NamedTuple):
@@ -15,7 +14,7 @@ class TopFlat(NamedTuple):
 
 class Database:
     def __init__(self):
-        self.dbname = PATH_TO_DB
+        self.dbname = cfg.PATH_TO_DB
         try:
             self.conn = sqlite3.connect(self.dbname)
         except:

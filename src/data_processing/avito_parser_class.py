@@ -13,8 +13,7 @@ import re
 
 
 logging.config.dictConfig(logger_cfg)
-log_error = logging.getLogger('log_error')
-log_info = logging.getLogger('log_info')
+logger = logging.getLogger('logger')
 
 RAND_TIME = random.uniform(1, 2.5)
 MAX_URL_RANGE = 15  # How many urls page we take for parsing at all
@@ -55,14 +54,12 @@ class AvitoParser:
         try:
             properties_list = {}
             # Get subway
-            log_info.info("GET SUBWAY")
             properties_list["subway"] = self.driver.find_element(
                 By.XPATH,
                 """/html/body/div[3]/div[1]/div/div/div[2]/div[2]/div[1]/div[2]/div[2]/div/div[2]/div[1]
                 /div/div/span/span[1]/span[2]""").text
 
             # Get distance
-            log_info.info("GET DISTANCE")
             distance = self.driver.find_elements(
                 By.CLASS_NAME, "style-item-address-georeferences-item-18pFt"
             )
@@ -72,7 +69,6 @@ class AvitoParser:
             time.sleep(RAND_TIME)
 
             # Get price
-            log_info.info("GET PRICE")
             price = int(
                 self.driver.find_elements(
                     By.CLASS_NAME, "style-price-value-main-1P7DJ"
@@ -84,7 +80,6 @@ class AvitoParser:
             time.sleep(RAND_TIME)
 
             # Get address
-            log_info.info("GET ADDRESS")
             address = self.driver.find_element(
                 By.CLASS_NAME, "style-item-address__string-3Ct0s"
             ).text
@@ -92,7 +87,6 @@ class AvitoParser:
             time.sleep(RAND_TIME)
 
             # Get time
-            log_info.info("GET TIME")
             times = self.driver.find_element(
                 By.CLASS_NAME, "style-item-footer-3uXQz"
             ).text
@@ -100,7 +94,6 @@ class AvitoParser:
             time.sleep(RAND_TIME)
 
             # Get properties about house
-            log_info.info("GET PROPERTIES")
             house = self.driver.find_elements(
                 By.CLASS_NAME, "style-item-params-list-3YJu7"
             )
@@ -111,7 +104,6 @@ class AvitoParser:
                     properties_list[column] = value.strip()
 
             # Get properties about flat
-            log_info.info("GET PROPERTIES2")
             flat = self.driver.find_elements(By.CLASS_NAME, "params-paramsList-2PiKQ")
             for items in flat:
                 flat_properties_list = items.text.split("\n")
@@ -121,12 +113,11 @@ class AvitoParser:
             time.sleep(RAND_TIME)
 
             # Get link
-            log_info.info("GET LINK")
             link = f"{self.driver.current_url}"
             properties_list["link"] = link if link else None
             time.sleep(RAND_TIME)
         except:                             # ошибка когда мы хотим обратится к объекту а его нет. Нужно ли ловить?
-            log_info.info("EXCEPT HANDLING PROPERTIES")
+            logger.info("EXCEPT HANDLING PROPERTIES")
             return None
         else:
             return properties_list
@@ -158,13 +149,13 @@ class AvitoParser:
         pages = []
         for num in page_range:
             pages.append(f"{cur_page[:-6]}&p={num}&s=104")
-        log_info.info(f'ALL READY PAGES - {pages}')
+        logger.info(f'ALL READY PAGES - {pages}')
         return pages
 
     def _parse_objects(self, pages: list) -> None:
         """Start parsing from first page to given "MAX_URL_LINKS" page"""
         for page_url in pages:
-            log_info.info(f"CURRENT PAGE: {page_url}")
+            logger.info(f"CURRENT PAGE: {page_url}")
             self.driver.get(page_url)
             time.sleep(RAND_TIME)
 
@@ -173,7 +164,7 @@ class AvitoParser:
             time.sleep(RAND_TIME)
 
             for obj in range(len(links)):
-                log_info.info(F"COLLECTING {obj} LINK")
+                logger.info(F"COLLECTING {obj} LINK")
                 try:
                     links[obj].click()
                     time.sleep(RAND_TIME)
@@ -181,12 +172,12 @@ class AvitoParser:
                     data = self._handling_properties() # Start collection data from object
                     if data is not None:
                         self.storage.append(data)
-                        log_info.info(f"{obj} LINK HAS BEEN COLLECTED")
+                        logger.info(f"{obj} LINK HAS BEEN COLLECTED")
                     time.sleep(RAND_TIME)
                     self.driver.close()
                     self.driver.switch_to.window(self.driver.window_handles[0])
                 except:
-                    log_info.info(f"{obj} LINK WAS NOT COLLECTED {links[obj]}")
+                    logger.info(f"{obj} LINK WAS NOT COLLECTED {links[obj]}")
 
     def start_parser(self, count_url: int = MAX_URL_RANGE) -> list:
         """

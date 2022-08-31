@@ -9,8 +9,7 @@ from src.logcfg import logger_cfg
 from cfg import PATH_TO_SAVE_MODEL, COLUMNS, MODEL_PARAMS
 
 logging.config.dictConfig(logger_cfg)
-log_error = logging.getLogger('log_error')
-log_info = logging.getLogger('log_info')
+logger = logging.getLogger('logger')
 
 
 class ModelRetraining:
@@ -158,7 +157,7 @@ class ModelRetraining:
             return X_train, X_val, X_test, y_train, y_val, y_test, cat_features
 
         except Exception as err:
-            log_error.error('TRAIN/TEST HAS NOT BEEN SPLIT!', err, exc_info=True)
+            logger.error('TRAIN/TEST HAS NOT BEEN SPLIT!', err, exc_info=True)
             raise
 
     @staticmethod
@@ -174,10 +173,10 @@ class ModelRetraining:
     def start_model_retraining(self):
         all_items = db.get_all_items()
         all_items['rating'] = all_items.apply(self._get_target, axis=1)
-        log_info.info("EQUATION HAS BEEN APPLIED")
+        logger.info("EQUATION HAS BEEN APPLIED")
 
         X_train, X_val, X_test, y_train, y_val, y_test, cat_features = self._prepare_training_dataset(all_items)
-        log_info.info("TRAIN/TEST HAS BEEN SPLIT")
+        logger.info("TRAIN/TEST HAS BEEN SPLIT")
 
         try:
             model = CatBoostRegressor(**MODEL_PARAMS)
@@ -186,10 +185,10 @@ class ModelRetraining:
             self._save_model(model, PATH_TO_SAVE_MODEL)
             # Здесь MLflow сохраняет бекап и параметры
         except Exception as err:
-            log_error.error('MODEL HAS NOT BEEN TRAINED!', err, exc_info=True)
+            logger.error('MODEL HAS NOT BEEN TRAINED!', err, exc_info=True)
             raise
         else:
-            log_info.info("MODEL HAS BEEN TRAINED AND SAVED")
+            logger.info("MODEL HAS BEEN TRAINED AND SAVED")
             return metrics
 
 

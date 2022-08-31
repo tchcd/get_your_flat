@@ -8,15 +8,14 @@ from src.logcfg import logger_cfg
 from cfg import PATH_TO_INIT_MODEL, PATH_TO_LAST_MODEL
 
 logging.config.dictConfig(logger_cfg)
-log_error = logging.getLogger('log_error')
-log_info = logging.getLogger('log_info')
+logger = logging.getLogger('logger')
 
 if os.path.exists(PATH_TO_LAST_MODEL):
     MODEL_PATH = PATH_TO_LAST_MODEL
-    log_info.info(f'LAST MODEL SELECTED')
+    logger.info(f'LAST MODEL SELECTED')
 else:
     MODEL_PATH = PATH_TO_INIT_MODEL
-    log_info.info(f'INIT MODEL SELECTED')
+    logger.info(f'INIT MODEL SELECTED')
 
 MODEL = pickle.load(open(MODEL_PATH, "rb"))
 COLUMNS = MODEL.feature_names_
@@ -32,10 +31,10 @@ def get_daily_predict(model, db) -> pd.DataFrame:
         df["rating"] = model.predict(df[COLUMNS])
         db.update_estimated_items(df)
     except Exception as err:
-        log_error.error('WORK PREDICTION MODEL HAS BEEN FAILED', err, exc_info=True)
+        logger.error('WORK PREDICTION MODEL HAS BEEN FAILED', err, exc_info=True)
         raise
     else:
-        log_info.info(f'{df.shape[0]} NEW ITEMS HAS BEEN EVALUATED')
+        logger.info(f'{df.shape[0]} NEW ITEMS HAS BEEN EVALUATED')
         return df
 
 
