@@ -172,7 +172,7 @@ class AvitoParser:
             links = self.driver.find_elements(By.CLASS_NAME, "iva-item-root-_lk9K")
             time.sleep(RAND_TIME)
 
-            for obj in range(len(links))[:3]:
+            for obj in range(len(links)):
                 log_info.info(F"COLLECTING {obj} LINK")
                 try:
                     links[obj].click()

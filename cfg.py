@@ -20,7 +20,10 @@ PATH_TO_SAVE_MODEL = Path(MODELS_PATH) / 'cb_last.sav'
 PATH_TO_LAST_MODEL = Path(MODELS_PATH) / 'cb_last.sav'
 PATH_TO_INIT_MODEL = Path(MODELS_PATH) / 'cb_init.sav'
 
-# ML model parametrs
+# Parser parameters
+URL_COUNT = 20
+
+# ML model parameters
 MODEL_PARAMS = {
     'learning_rate': 0.05,
     'iterations': 5000,

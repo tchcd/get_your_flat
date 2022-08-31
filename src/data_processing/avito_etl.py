@@ -4,6 +4,7 @@ from src.logcfg import logger_cfg
 from transform_data import DataTransformation, SaveToJson, SaveToCsv
 from src.database import Database
 from src import exceptions
+import cfg
 
 logging.config.dictConfig(logger_cfg)
 log_error = logging.getLogger('log_error')
@@ -14,7 +15,7 @@ def avito_etl(database):
     """Pipeline avito parsing -> prepare raw data -> add prepared data to database"""
     try:
         log_info.info("PARSING HAS BEEN STARTED")
-        data = AvitoParser(headless=True).start_parser(count_url=3)
+        data = AvitoParser(headless=True).start_parser(count_url=cfg.URL_COUNT)
         log_info.info("PARSING HAS BEEN SUCCESSFULLY COMPLETED")
         SaveToJson(data).save()
 
