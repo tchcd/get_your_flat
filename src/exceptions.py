@@ -1,67 +1,98 @@
+import logging
+from src.logcfg import logger_cfg
+
+logging.config.dictConfig(logger_cfg)
+logger = logging.getLogger('logger')
+
+
 # Parser Exceptions
 class ParserError(Exception):
-    pass
+    def __init__(self, msg=''):
+        self.msg = msg
+        logger.exception(msg)
+
+    def __str__(self):
+        return self.msg
 
 
 class ParsingNotComplete(ParserError):
-    super().__init__(
-        "PARSER HAS BEEN FAILED!"
-    )
+    def __init__(self):
+        super().__init__(
+            msg="PARSER HAS BEEN FAILED!"
+        )
 
 
 class TransformDataNotComplete(ParserError):
-    super().__init__(
-        "DATA TRANSFORMATION HAS BEEN FAILED"
-    )
+    def __init__(self):
+        super().__init__(
+            msg="DATA TRANSFORMATION HAS BEEN FAILED"
+        )
 
 
 # Database Exceptions
 class DatabaseError(Exception):
-    pass
+    def __init__(self, msg=''):
+        self.msg = msg
+        logger.exception(msg)
+
+    def __str__(self):
+        return self.msg
 
 
 class AddToDBFailed(DatabaseError):
-    super().__init__(
-        "ADD ITEMS TO DATABASE HAS BEEN FAILED"
-    )
+    def __init__(self):
+        super().__init__(
+            msg="ADD ITEMS TO DATABASE HAS BEEN FAILED"
+        )
 
 
 class DBConnectionFailed(DatabaseError):
-    super().__init__(
-        "DATABASE CONNECTION FAILED"
-    )
+    def __init__(self):
+        super().__init__(
+            msg="DATABASE CONNECTION FAILED"
+        )
 
 
 class UpdateDBItemsFailed(DatabaseError):
-    super().__init__(
-        "UPDATE ITEM VALUES HAS BEEN FAILED"
-    )
+    def __init__(self):
+        super().__init__(
+            msg="UPDATE ITEM VALUES HAS BEEN FAILED"
+        )
 
 
 # Model Retraining Exceptions
 class RetrainingModelError(Exception):
-    pass
+    def __init__(self, msg=''):
+        self.msg = msg
+        logger.exception(msg)
+
+    def __str__(self):
+        return self.msg
 
 
 class TrainTestSplitFailed(RetrainingModelError):
-    super().__init__(
-        "TRAIN TEST SPLIT ERROR"
-    )
+    def __init__(self):
+        super().__init__(
+            msg="TRAIN TEST SPLIT ERROR"
+        )
 
 
 class NotItemsWithoutRating(RetrainingModelError):
-    super().__init__(
-        "NO ITEMS IN DATAFRAME FOR RETRAINING MODEL"
-    )
+    def __init__(self):
+        super().__init__(
+            msg="NO ITEMS IN DATAFRAME FOR RETRAINING MODEL"
+        )
 
 
 class EstimateModelFailed(RetrainingModelError):
-    super().__init__(
-        "THE MODEL CANNOT BE EVALUATED"
-    )
+    def __init__(self):
+        super().__init__(
+            msg="THE MODEL CANNOT BE EVALUATED"
+        )
 
 
 class RatingEquationFailed(RetrainingModelError):
-    super().__init__(
-        "RATING EQUATION CANNOT BE APPLIED"
-    )
+    def __init__(self):
+        super().__init__(
+            msg="RATING EQUATION CANNOT BE APPLIED"
+        )

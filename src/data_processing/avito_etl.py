@@ -27,16 +27,12 @@ def avito_etl(database: Database) -> None:
         logger.info(f"{len(transformed_df)} ITEMS HAS BEEN ADDED TO DATABASE")
 
     except exc.ParsingNotComplete:
-        logger.exception("PARSING HAS NOT BEEN COMPLETED!")
         raise
     except exc.TransformDataNotComplete:
-        logger.exception("DATA TRANSFORMATION HAS NOT BEEN COMPLETED!")
         raise
     except exc.AddToDBFailed:
-        logger.exception("PARSED DATA HAS NOT BEEN ADDED TO DATABASE!")
         raise
     except exc.DBConnectionFailed:
-        logger.exception("DATABASE HAS NOT BEEN CONNECTED!")
         raise
 
 

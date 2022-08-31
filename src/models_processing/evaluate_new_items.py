@@ -34,13 +34,10 @@ def get_new_items_predict(model, database: Database) -> pd.DataFrame:
         database.update_estimated_items(df)
 
     except exc.DBConnectionFailed:
-        logger.exception("DATABASE CONNECTION HAS BEEN FAILED")
         raise
     except exc.NotItemsWithoutRating:
-        logger.exception("DF FOR EVALUATE NEW ITEMS IS EMPTY")
         raise
     except exc.UpdateDBItemsFailed:
-        logger.exception("UPDATE DATABASE ITEMS WITH NEW VALUES HAS BEEN FAILED")
         raise
     else:
         logger.info(f'{df.shape[0]} NEW ITEMS HAS BEEN EVALUATED')
@@ -50,5 +47,3 @@ def get_new_items_predict(model, database: Database) -> pd.DataFrame:
 if __name__ == "__main__":
     db = Database()
     get_new_items_predict(MODEL, db)
-
-# Проблема в том, что переобученая модель предсказывает только итемы с НаН, в том числе из за апдейта БД где rating is Null

@@ -25,7 +25,7 @@ ERRORS_LOG_FILE = Path(f"{MAIN_FOLDER}/logs") / 'errors.log'
 INFO_LOG_FILE = Path(f"{MAIN_FOLDER}/logs") / 'info.log'
 
 # Parser parameters
-URL_COUNT = 20
+URL_COUNT = 10
 SELENIUM_HEADLESS = True
 
 # ML model parameters

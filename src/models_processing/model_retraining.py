@@ -156,8 +156,8 @@ class ModelRetraining:
             df = df[cfg.COLUMNS].copy()
             X = df.drop('rating', axis=1)
             y = df['rating']
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=20, random_state=42)
-            X_val, X_test, y_val, y_test = train_test_split(X_test, y_test, test_size=40, random_state=42)
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+            X_val, X_test, y_val, y_test = train_test_split(X_test, y_test, test_size=0.4, random_state=42)
             cat_features = [X_train.columns.get_loc(col) for col in X_train.select_dtypes(include=object).columns]
             return X_train, X_val, X_test, y_train, y_val, y_test, cat_features
         except Exception as err:
@@ -206,19 +206,14 @@ class ModelRetraining:
             # Здесь MLflow сохраняет бекап и параметры
 
         except exc.DBConnectionFailed:
-            logger.exception("DATABASE CONNECTION HAS BEEN FAILED")
             raise
         except exc.RatingEquationFailed:
-            logger.exception("RATING EQUATION HAS BEEN FAILED ")
             raise
         except exc.TrainTestSplitFailed:
-            logger.exception("TRAIN TEST SPLIT HAS BEEN FAILED")
             raise
         except exc.NotItemsWithoutRating:
-            logger.exception("DF FOR RETRAINING MODEL IS EMPTY")
             raise
         except exc.EstimateModelFailed:
-            logger.exception("MODEL ESTIMATION HAS BEEN FAILED")
             raise
         else:
             return metrics
@@ -226,7 +221,7 @@ class ModelRetraining:
 
 if __name__ == "__main__":
     db = Database()
-    model_retrain = ModelRetraining(db=db, save_path=cfg.PATH_TO_SAVE_MODEL)
+    model_retrain = ModelRetraining(database=db, save_path=cfg.PATH_TO_SAVE_MODEL)
     model_retrain.start_model_retraining()
 
 
