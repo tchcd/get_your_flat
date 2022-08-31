@@ -1,6 +1,6 @@
 import sqlite3
 import pandas as pd
-from src import exceptions
+import src.exceptions as exc
 from typing import NamedTuple
 import cfg
 
@@ -13,12 +13,12 @@ class TopFlat(NamedTuple):
 
 
 class Database:
-    def __init__(self):
-        self.dbname = cfg.PATH_TO_DB
+    def __init__(self, dbname=cfg.PATH_TO_DB):
+        self.dbname = dbname
         try:
             self.conn = sqlite3.connect(self.dbname)
-        except:
-            raise exceptions.db_connect_failed('db connection failed')
+        except Exception as err:
+            raise exc.DBConnectionFailed from err
         self.cursor = self.conn.cursor()
 
     def add_parsed_items(self, column_values: pd.DataFrame, table: str = "items"):
@@ -30,8 +30,8 @@ class Database:
                 values,
             )
             self.conn.commit()
-        except:
-            raise exceptions.db_data_transfer_failed('PARSED DATA HAS NOT BEEN ADDED TO DATABASE')
+        except Exception as err:
+            raise exc.AddToDBFailed from err
 
     def get_top_item(self) -> TopFlat:
         """Get top item from database"""
@@ -91,16 +91,15 @@ class Database:
         self.conn.commit()
 
     def update_estimated_items(self, estimated_df: pd.DataFrame, table: str = "items"):
-        estimated_df.to_sql('temp_table', self.conn, if_exists='replace')  # create temp table with rating
-        query = f"""
-                UPDATE items
-                SET rating = (SELECT t.rating FROM temp_table t WHERE t.id = items.id)
-                WHERE rating is Null
-                """
-        self.cursor.execute(query)
-        self.conn.commit()
+        try:
+            estimated_df.to_sql('temp_table', self.conn, if_exists='replace')  # create temp table with rating
+            query = f"""
+                    UPDATE items
+                    SET rating = (SELECT t.rating FROM temp_table t WHERE t.id = items.id)
+                    WHERE rating is Null
+                    """
+            self.cursor.execute(query)
+            self.conn.commit()
+        except Exception as err:
+            raise exc.UpdateDBItemsFailed from err
 
-
-#
-# if __name__ == "__main__":
-#     pass

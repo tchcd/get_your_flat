@@ -5,7 +5,7 @@ from selenium.webdriver.support.select import Select
 from datetime import date, timedelta
 from src.logcfg import logger_cfg
 import logging
-from src import exceptions
+from src import exceptions as exc
 import pickle
 import random
 import time
@@ -116,7 +116,7 @@ class AvitoParser:
             link = f"{self.driver.current_url}"
             properties_list["link"] = link if link else None
             time.sleep(RAND_TIME)
-        except:                             # ошибка когда мы хотим обратится к объекту а его нет. Нужно ли ловить?
+        except:
             logger.info("EXCEPT HANDLING PROPERTIES")
             return None
         else:
@@ -186,12 +186,15 @@ class AvitoParser:
         :param count_url: number of generated pages for the parser
         :return: list of dictionaries with listing objects
         """
-        self._auth_avito()
-        self._get_filters()
-        pages_to_parse = self._pages_generation(count_url=count_url)
-        self._parse_objects(pages_to_parse)
-
-        return self.storage
+        try:
+            self._auth_avito()
+            self._get_filters()
+            pages_to_parse = self._pages_generation(count_url=count_url)
+            self._parse_objects(pages_to_parse)
+        except Exception as err:
+            raise exc.ParsingNotComplete from err
+        else:
+            return self.storage
 
 
 

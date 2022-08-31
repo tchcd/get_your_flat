@@ -1,19 +1,13 @@
-# Это модуль подготовки данных после получения из пасрсера
 import logging
 import json
 from src.logcfg import logger_cfg
 import pandas as pd
 from datetime import date, timedelta, datetime
-import dataenforce
-from cfg import RAW_DATA_PATH_JSON, TRANSFORMED_DATA_PATH_CSV
-
-from test import raw
-from src.database import Database
-
+import cfg
+import src.exceptions as exc
 
 logging.config.dictConfig(logger_cfg)
-log_error = logging.getLogger('log_error')
-log_info = logging.getLogger('log_info')
+logger = logging.getLogger('logger')
 
 
 class DataTransformation:
@@ -141,21 +135,25 @@ class DataTransformation:
         :param raw_data: list of dictionaries
         :return: cleaned Dataframe
         """
-        log_info.info('START PARSED DATA PREPARING')
-        valid_items = self._check_valid_columns(raw_data)
-        df = self._create_df(valid_items)
-        df = self._transform_time(df)
-        df = self._transfrom_subway(df)
-        df = self._transform_area(df)
-        df = self._transform_floors(df)
-        df = self._drop_columns(df)
-        df = self._fill_nan(df)
-        df['sqmeter_price'] = df['price'] // df['total_area']
-        df["rooms"].astype(int)
-        df = df.drop_duplicates('link')
-        log_info.info('STOP PARSED DATA PREPARING')
 
-        return df
+        try:
+            logger.info('START PARSED DATA PREPARING')
+            valid_items = self._check_valid_columns(raw_data)
+            df = self._create_df(valid_items)
+            df = self._transform_time(df)
+            df = self._transfrom_subway(df)
+            df = self._transform_area(df)
+            df = self._transform_floors(df)
+            df = self._drop_columns(df)
+            df = self._fill_nan(df)
+            df['sqmeter_price'] = df['price'] // df['total_area']
+            df["rooms"].astype(int)
+            df = df.drop_duplicates('link')
+            logger.info('STOP PARSED DATA PREPARING')
+        except Exception as err:
+            raise exc.TransformDataNotComplete from err
+        else:
+            return df
 
 
 class SaveToJson:
@@ -163,7 +161,7 @@ class SaveToJson:
         self.data = data
 
     def save(self):
-        with open(RAW_DATA_PATH_JSON, "w", encoding="utf-8") as file:
+        with open(cfg.RAW_DATA_PATH_JSON, "w", encoding="utf-8") as file:
             json.dump(self.data, file, indent=4, ensure_ascii=False)
 
 
@@ -172,13 +170,4 @@ class SaveToCsv:
         self.dataframe = df
 
     def save(self):
-        self.dataframe.to_csv(TRANSFORMED_DATA_PATH_CSV, index=False, encoding='utf-8-sig')
-
-
-if __name__ == '__main__':
-    db = Database()
-    db_item = pd.read_csv(r'C:\Users\q\Desktop\db_items.csv', sep=',', encoding='Windows-1252')
-    print(db_item)
-    #data = DataTransformation().start_transform(raw)
-    #db.add_parsed_items(column_values=data)
-    #log_info.info(f"{len(data)} ITEMS HAS BEEN ADDED TO DATABASE")
+        self.dataframe.to_csv(cfg.TRANSFORMED_DATA_PATH_CSV, index=False, encoding='utf-8-sig')

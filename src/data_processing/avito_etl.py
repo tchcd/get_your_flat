@@ -3,18 +3,18 @@ import logging
 from src.logcfg import logger_cfg
 from transform_data import DataTransformation, SaveToJson, SaveToCsv
 from src.database import Database
-from src import exceptions
+from src import exceptions as exc
 import cfg
 
 logging.config.dictConfig(logger_cfg)
 logger = logging.getLogger('logger')
 
 
-def avito_etl(database):
-    """Pipeline avito parsing -> prepare raw data -> add prepared data to database"""
+def avito_etl(database: Database) -> None:
+    """Pipeline avito parsing -> transform raw data -> add prepared data to database"""
     try:
         logger.info("PARSING HAS BEEN STARTED")
-        data = AvitoParser(headless=True).start_parser(count_url=cfg.URL_COUNT)
+        data = AvitoParser(headless=cfg.SELENIUM_HEADLESS).start_parser(count_url=cfg.URL_COUNT)
         logger.info("PARSING HAS BEEN SUCCESSFULLY COMPLETED")
         SaveToJson(data).save()
 
@@ -26,13 +26,18 @@ def avito_etl(database):
         database.add_parsed_items(column_values=transformed_df)
         logger.info(f"{len(transformed_df)} ITEMS HAS BEEN ADDED TO DATABASE")
 
-    except exceptions.prepare_data_failed as err:
-        logger.exception(err)
-    except exceptions.parse_data_failed as err:
-        logger.exception(err)
-    except exceptions.db_connect_failed as err:
-        logger.error('NOT CONNECTED TO DATABASE')
-        logger.exception(err)
+    except exc.ParsingNotComplete:
+        logger.exception("PARSING HAS NOT BEEN COMPLETED!")
+        raise
+    except exc.TransformDataNotComplete:
+        logger.exception("DATA TRANSFORMATION HAS NOT BEEN COMPLETED!")
+        raise
+    except exc.AddToDBFailed:
+        logger.exception("PARSED DATA HAS NOT BEEN ADDED TO DATABASE!")
+        raise
+    except exc.DBConnectionFailed:
+        logger.exception("DATABASE HAS NOT BEEN CONNECTED!")
+        raise
 
 
 if __name__ == "__main__":
