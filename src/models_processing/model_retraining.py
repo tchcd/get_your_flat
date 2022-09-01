@@ -1,4 +1,5 @@
 import pandas as pd
+import mlflow
 from catboost import CatBoostRegressor
 import logging
 import pickle
@@ -185,6 +186,7 @@ class ModelRetraining:
         Get all items from database -> get train/test dfs -> retrain and save model
         :return: two metrics MAE and MAPE
         """
+
         try:
             all_items_df = db.get_all_items()
             if len(all_items_df) == 0:
@@ -196,14 +198,24 @@ class ModelRetraining:
             X_train, X_val, X_test, y_train, y_val, y_test, cat_features = self._prepare_training_dataset(all_items_df)
             logger.info("TRAIN/TEST HAS BEEN SPLIT")
 
-            model = CatBoostRegressor(**cfg.MODEL_PARAMS)
-            model.fit(X_train, y_train, eval_set=(X_val, y_val), cat_features=cat_features)
-            logger.info("MODEL HAS BEEN RETRAINED")
+            # Retraining model with MLFlow tracking
+            mlflow.set_tracking_uri(cfg.MLFLOW_HOST)
+            mlflow.set_experiment(cfg.MLFLOW_NAME_EXPERIMENT)
+            with mlflow.start_run():
+                model = CatBoostRegressor(**cfg.MODEL_PARAMS)
+                model.fit(X_train, y_train, eval_set=(X_val, y_val), cat_features=cat_features)
+                logger.info("MODEL HAS BEEN RETRAINED")
 
-            metrics = self._get_model_score(y_test, model.predict(X_test))
-            self._save_model(model, cfg.PATH_TO_SAVE_MODEL)
-            logger.info("MODEL HAS BEEN SAVE")
-            # Здесь MLflow сохраняет бекап и параметры
+                metrics = self._get_model_score(y_test, model.predict(X_test))
+
+                mlflow.log_params(cfg.MODEL_PARAMS)
+                mlflow.log_metric("MAE", metrics[0])
+                mlflow.log_metric("MAPE", metrics[1])
+                mlflow.catboost.log_model(cb_model=model,
+                                          artifact_path='mlflow',
+                                          registered_model_name='cb_default'
+                                          )
+                mlflow.end_run()
 
         except exc.DBConnectionFailed:
             raise
@@ -216,6 +228,8 @@ class ModelRetraining:
         except exc.EstimateModelFailed:
             raise
         else:
+            self._save_model(model, cfg.PATH_TO_SAVE_MODEL)
+            logger.info("MODEL HAS BEEN SAVE")
             return metrics
 
 

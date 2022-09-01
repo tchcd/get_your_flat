@@ -31,10 +31,15 @@ SELENIUM_HEADLESS = True
 # ML model parameters
 MODEL_PARAMS = {
     'learning_rate': 0.05,
-    'iterations': 5000,
+    'iterations': 500,
     'early_stopping_rounds': 500
 }
 
 # Columns for predict and retrain ML model
 COLUMNS = ['rating', 'price', 'sqmeter_price', 'subway', 'minutes_to_subway', 'rooms', 'total_area',
            'balcony', 'type_of_renovation', 'type_of_house', 'cur_floor', 'cnt_floors']
+
+#MLFlow params
+MLFLOW_PATH = Path(f"{MAIN_FOLDER}/reports") / 'mlflow_reports.ini'
+MLFLOW_HOST = "http://localhost:5000/"
+MLFLOW_NAME_EXPERIMENT = 'local_test'
