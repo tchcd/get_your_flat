@@ -32,7 +32,6 @@ def get_new_items_predict(model, database: Database) -> pd.DataFrame:
             raise exc.NotItemsWithoutRating
         df["rating"] = model.predict(df[COLUMNS])
         database.update_estimated_items(df)
-
     except exc.DBConnectionFailed:
         raise
     except exc.NotItemsWithoutRating:

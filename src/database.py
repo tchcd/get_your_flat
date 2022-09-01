@@ -94,9 +94,9 @@ class Database:
         try:
             estimated_df.to_sql('temp_table', self.conn, if_exists='replace')  # create temp table with rating
             query = f"""
-                    UPDATE items
-                    SET rating = (SELECT t.rating FROM temp_table t WHERE t.id = items.id)
-                    WHERE rating is Null
+                    UPDATE {table}
+                    SET rating = (SELECT t.rating FROM temp_table t WHERE t.id = {table}.id)
+                    WHERE id in (SELECT t.id FROM temp_table t)                    
                     """
             self.cursor.execute(query)
             self.conn.commit()

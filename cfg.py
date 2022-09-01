@@ -38,7 +38,3 @@ MODEL_PARAMS = {
 # Columns for predict and retrain ML model
 COLUMNS = ['rating', 'price', 'sqmeter_price', 'subway', 'minutes_to_subway', 'rooms', 'total_area',
            'balcony', 'type_of_renovation', 'type_of_house', 'cur_floor', 'cnt_floors']
-
-if __name__ == '__main__':
-    print(RAW_DATA_PATH_JSON)
-    pass
