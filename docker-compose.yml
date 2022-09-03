@@ -1,8 +1,5 @@
 version: "3.3"
 
-#volumes:
-#  flats_db:
-
 services:
   selenium-hub:
     restart: always
@@ -12,7 +9,7 @@ services:
       - 4444:4444
 
   chrome:
-    image: selenium/node-chrome:4.0.0-20211013
+    image: selenium/node-chrome:latest
     shm_size: 2gb
     depends_on:
       - selenium-hub
@@ -24,26 +21,10 @@ services:
     ports:
       - 6900:5900
 
-#    chrome:
-#      restart: always
-#      image: selenium/node-chrome-debug:3.14.0
-#      ports:
-#        - 6900:5900
-#      depends_on:
-#        - selenium-hub
-#      environment:
-#        HUB_HOST: selenium-hub
-#        HUB_PORT_4444_TCP_ADDR: selenium-hub
-#        HUB_PORT_4444_TCP_PORT: 4444
-#        DBUS_SESSION_BUS_ADDRESS: "/dev/null"
-#      links:
-#        - selenium-hub:hub
-
   app:
     build: .
     restart: always
     ports:
       - 5000:5000
     volumes:
-        #- flats_db:/db
-        - ./db:/usr/app/db   #https://af23-94-140-246-19.eu.ngrok.io
+        - ./db:/usr/app/db

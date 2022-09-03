@@ -32,12 +32,6 @@ class AvitoParser:
         if self.headless:
             self.options.headless = True
             self.options.add_argument("--no-sandbox")
-            # options.add_argument('--disable-dev-shm-usage')
-            # options.add_argument("--remote-debugging-port=9222")
-        # self.driver = webdriver.Chrome(
-        #     cfg.CHROME_DRIVER,
-        #     options=self.options,
-        # )
         self.driver = webdriver.Remote(command_executor="http://selenium-hub:4444/wd/hub",
                                        options=self.options)
 

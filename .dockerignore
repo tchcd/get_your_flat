@@ -1,11 +1,9 @@
 **/.git
 **/.gitignore
 #**/.env
-#**/.aws
 #**/.ssh
-#Dockerfile
-#README.md
-#docker-compose.yml
-#**/.DS_Store
+Dockerfile
+README.md
+docker-compose.yml
 **/venv
 #**/env
