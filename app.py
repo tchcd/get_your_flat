@@ -45,7 +45,7 @@ def main():
     link, price, subway, _ = parse_top_item()
 
     chat_id = flask_request.json["message"]["chat"]["id"]
-
+    tg_send_item(chat_id=chat_id, text=f"test")
     tg_send_item(chat_id=chat_id, text=f"Цена {price}")
     tg_send_item(chat_id=chat_id, text=f"Метро {subway}")
     tg_send_item(chat_id=chat_id, text=f"{link}")
@@ -54,4 +54,5 @@ def main():
 
 
 if __name__ == "__main__":
-    app.run()
+    #app.run()
+    app.run(port=5000, host='0.0.0.0')

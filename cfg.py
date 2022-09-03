@@ -8,7 +8,7 @@ DATE_NOW = datetime.now().date().strftime(format='%m-%d')
 MAIN_FOLDER = os.path.dirname(os.path.abspath(__file__))
 
 # Database path
-PATH_TO_DB = Path(MAIN_FOLDER) / 'flats.db'
+PATH_TO_DB = Path(f"{MAIN_FOLDER}/db") / 'flats.db'
 
 # Data paths
 RAW_DATA_PATH_JSON = Path(f"{MAIN_FOLDER}/files/process") / f"raw_data_{DATE_NOW}.json"
@@ -23,6 +23,10 @@ PATH_TO_INIT_MODEL = Path(MODELS_PATH) / 'cb_init.sav'
 # Logger paths
 ERRORS_LOG_FILE = Path(f"{MAIN_FOLDER}/logs") / 'errors.log'
 INFO_LOG_FILE = Path(f"{MAIN_FOLDER}/logs") / 'info.log'
+
+# Selenium paths
+SESSION = Path(MAIN_FOLDER) / 'session'
+CHROME_DRIVER = Path(MAIN_FOLDER) / 'chromedriver.exe'
 
 # Parser parameters
 URL_COUNT = 10
@@ -41,5 +45,5 @@ COLUMNS = ['rating', 'price', 'sqmeter_price', 'subway', 'minutes_to_subway', 'r
 
 #MLFlow params
 MLFLOW_PATH = Path(f"{MAIN_FOLDER}/reports") / 'mlflow_reports.ini'
-MLFLOW_HOST = "http://localhost:5000/"
+MLFLOW_HOST = "http://localhost:5001/"
 MLFLOW_NAME_EXPERIMENT = 'local_test'

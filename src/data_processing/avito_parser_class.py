@@ -9,6 +9,7 @@ import pickle
 import random
 import time
 import re
+import cfg
 
 
 logging.config.dictConfig(logger_cfg)
@@ -19,7 +20,7 @@ MAX_URL_RANGE = 15  # How many urls page we take for parsing at all
 
 
 class AvitoParser:
-    def __init__(self, headless=False):
+    def __init__(self, headless: bool):
         """Create and launch selenium webdriver object"""
         self.url = "https://www.avito.ru/sankt-peterburg/kvartiry/prodam/vtorichka"
         self.options = webdriver.ChromeOptions()
@@ -31,10 +32,15 @@ class AvitoParser:
         if self.headless:
             self.options.headless = True
             self.options.add_argument("--no-sandbox")
-        self.driver = webdriver.Chrome(
-            r"C:/Users/q/IdeaProjects/Python3/flatblet/chromedriver/chromedriver.exe",
-            options=self.options,
-        )
+            # options.add_argument('--disable-dev-shm-usage')
+            # options.add_argument("--remote-debugging-port=9222")
+        # self.driver = webdriver.Chrome(
+        #     cfg.CHROME_DRIVER,
+        #     options=self.options,
+        # )
+        self.driver = webdriver.Remote(command_executor="http://selenium-hub:4444/wd/hub",
+                                       options=self.options)
+
         self.rand_time = RAND_TIME
         self.storage = []
 
@@ -42,7 +48,7 @@ class AvitoParser:
         """Avito user authentication"""
         self.driver.get(self.url)
         time.sleep(RAND_TIME)
-        for cookie in pickle.load(open(r"C:\Users\q\IdeaProjects\Python3\flatblet\session", "rb")):
+        for cookie in pickle.load(open(cfg.SESSION, "rb")):
             self.driver.add_cookie(cookie)
         time.sleep(RAND_TIME)
         self.driver.get(self.url)
