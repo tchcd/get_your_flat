@@ -23,8 +23,23 @@ services:
 
   app:
     build: .
+    container_name: app
     restart: always
     ports:
       - 5000:5000
+    network_mode: host
     volumes:
         - ./db:/usr/app/db
+
+  mlflow:
+    build: ./mlflow
+    container_name: mlflow
+    ports:
+      - 5005:5005
+    network_mode: host
+    volumes:
+      - ./mlflow:/mlflow
+    #environment:
+      #BACKEND_URI: sqlite:////mlflow/mlflow.db
+      #ARTIFACT_ROOT: /mlflow/artifacts
+    command: 'mlflow server --backend-store-uri sqlite:////mlflow/mlflow.db --default-artifact-root /mlflow/artifacts --host 0.0.0.0 --port 5005'
