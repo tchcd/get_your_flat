@@ -4,7 +4,7 @@ ARG AIRFLOW_VERSION=2.3.4
 ARG AIRFLOW_USER_HOME=/usr/local/airflow
 ENV AIRFLOW_HOME=${AIRFLOW_USER_HOME}
 
-RUN pip install apache-airflow==${AIRFLOW_VERSION}
+RUN pip install apache-airflow[postgres]==${AIRFLOW_VERSION}
 #RUN pip install SQLAlchemy==1.3.23
 
 RUN mkdir /get_your_flat

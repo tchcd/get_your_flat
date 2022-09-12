@@ -11,4 +11,5 @@ RUN pip install -r requirements.txt
 
 ENV PYTHONPATH /get_your_flat
 
+#ENTRYPOINT ["/get_your_flat/run.sh"]
 CMD ["python", "app.py"]

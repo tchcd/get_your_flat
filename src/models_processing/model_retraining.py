@@ -157,8 +157,8 @@ class ModelRetraining:
             df = df[cfg.COLUMNS].copy()
             X = df.drop('rating', axis=1)
             y = df['rating']
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-            X_val, X_test, y_val, y_test = train_test_split(X_test, y_test, test_size=0.4, random_state=42)
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=cfg.RANDOM_SEED)
+            X_val, X_test, y_val, y_test = train_test_split(X_test, y_test, test_size=0.4, random_state=cfg.RANDOM_SEED)
             cat_features = [X_train.columns.get_loc(col) for col in X_train.select_dtypes(include=object).columns]
             return X_train, X_val, X_test, y_train, y_val, y_test, cat_features
         except Exception as err:
@@ -199,8 +199,12 @@ class ModelRetraining:
             logger.info("TRAIN/TEST HAS BEEN SPLIT")
 
             # Retraining model with MLFlow tracking
-            mlflow.set_tracking_uri(cfg.MLFLOW_HOST)
-            mlflow.set_experiment(cfg.MLFLOW_NAME_EXPERIMENT)
+            try:
+                mlflow.set_tracking_uri(cfg.MLFLOW_HOST)
+                mlflow.set_experiment(cfg.MLFLOW_NAME_EXPERIMENT)
+                logger.info('MLFLOW HOST CONNECTING WAS SUCCESSFUL')
+            except:
+                logger.info('MLFLOW HOST CONNECTING WAS NOT SUCCESSFUL')
             model = CatBoostRegressor(**cfg.MODEL_PARAMS)
             model.fit(X_train, y_train, eval_set=(X_val, y_val), cat_features=cat_features)
             logger.info("MODEL HAS BEEN RETRAINED")
@@ -210,10 +214,10 @@ class ModelRetraining:
             mlflow.log_params(cfg.MODEL_PARAMS)
             mlflow.log_metric("MAE", metrics[0])
             mlflow.log_metric("MAPE", metrics[1])
-            #mlflow.catboost.log_model(cb_model=model,
-            #                          artifact_path='mlflow',
-            #                          registered_model_name='cb_default'
-            #                          )
+            mlflow.catboost.log_model(cb_model=model,
+                                      artifact_path='mlflow',
+                                      registered_model_name='cb_default'
+                                      )
 
         except exc.DBConnectionFailed:
             raise

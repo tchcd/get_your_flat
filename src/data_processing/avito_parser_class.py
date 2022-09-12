@@ -16,7 +16,6 @@ logging.config.dictConfig(logger_cfg)
 logger = logging.getLogger('logger')
 
 RAND_TIME = random.uniform(1, 2.5)
-MAX_URL_RANGE = 15  # How many urls page we take for parsing at all
 
 
 class AvitoParser:
@@ -34,67 +33,55 @@ class AvitoParser:
             self.options.add_argument("--no-sandbox")
         self.driver = webdriver.Remote(command_executor="http://selenium-hub:4444/wd/hub",
                                        options=self.options)
-
+        #self.driver = webdriver.Chrome(r"C:\Users\q\IdeaProjects\Python3\flatblet\chromedriver\chromedriver.exe", options=self.options)
+        self.driver.implicitly_wait(5)
         self.rand_time = RAND_TIME
         self.storage = []
 
     def _auth_avito(self):
         """Avito user authentication"""
         self.driver.get(self.url)
-        time.sleep(RAND_TIME)
         for cookie in pickle.load(open(cfg.SESSION, "rb")):
             self.driver.add_cookie(cookie)
-        time.sleep(RAND_TIME)
         self.driver.get(self.url)
         return self
 
     def _handling_properties(self):
         """Collect flat listing properties"""
         try:
+            time.sleep(RAND_TIME)
             properties_list = {}
+
             # Get subway
-            properties_list["subway"] = self.driver.find_element(
-                By.XPATH,
-                """/html/body/div[3]/div[1]/div/div/div[2]/div[2]/div[1]/div[2]/div[2]/div/div[2]/div[1]
-                /div/div/span/span[1]/span[2]""").text
+            properties_list["subway"] = self.driver.find_elements(
+                By.CSS_SELECTOR,
+                "#app > div > div.index-root-nb9Lx.index-responsive-yh9uW.index-page_default-RyjXj > div > div.style-item-view-PCYlM.react-exp > div.style-item-view-content-SDgKX > div.style-item-view-content-left-bb5Ih > div.style-item-view-main-tKI1S.js-item-view-main.style-item-min-height-TJwyJ > div.style-item-view-block-SEFaY.style-item-view-map-rppAn.style-opened-bPigk.style-new-style-iX7zV > div > div.style-item-map-location-wbfMT > div.style-item-address-KooqC > div > div > span > span:nth-child(1) > span:nth-child(2)"
+            )[0].text
 
             # Get distance
             distance = self.driver.find_elements(
-                By.CLASS_NAME, "style-item-address-georeferences-item-18pFt"
-            )
-            properties_list["minutes_to_subway"] = int(
-                re.findall(r"(\d+)", distance[0].text)[-1]
-            )
-            time.sleep(RAND_TIME)
+                By.CSS_SELECTOR,
+                "#app > div > div.index-root-nb9Lx.index-responsive-yh9uW.index-page_default-RyjXj > div > div.style-item-view-PCYlM.react-exp > div.style-item-view-content-SDgKX > div.style-item-view-content-left-bb5Ih > div.style-item-view-main-tKI1S.js-item-view-main.style-item-min-height-TJwyJ > div.style-item-view-block-SEFaY.style-item-view-map-rppAn.style-opened-bPigk.style-new-style-iX7zV > div > div.style-item-map-location-wbfMT > div.style-item-address-KooqC > div > div > span > span:nth-child(1) > span.style-item-address-georeferences-item-interval-ujKs2")
+            properties_list["minutes_to_subway"] = int(re.findall("(\d+)", distance[0].text)[-1])
 
             # Get price
-            price = int(
-                self.driver.find_elements(
-                    By.CLASS_NAME, "style-price-value-main-1P7DJ"
-                )[1]
-                .find_element(By.CLASS_NAME, "js-item-price")
-                .text.replace(" ", "")
-            )
-            properties_list["price"] = price if price else None
-            time.sleep(RAND_TIME)
+            properties_list["price"] = int(self.driver.find_elements(
+                By.CLASS_NAME, "style-item-price-text-_w822")[0].text.replace(" ",""))
 
             # Get address
             address = self.driver.find_element(
-                By.CLASS_NAME, "style-item-address__string-3Ct0s"
+                By.CLASS_NAME, "style-item-address__string-wt61A"
             ).text
-            properties_list["address"] = address if address else None
-            time.sleep(RAND_TIME)
+            properties_list["address"] = address
 
             # Get time
-            times = self.driver.find_element(
-                By.CLASS_NAME, "style-item-footer-3uXQz"
+            properties_list["time"] = self.driver.find_element(
+                By.CLASS_NAME, "style-item-footer-Ufxh_"
             ).text
-            properties_list["time"] = times
-            time.sleep(RAND_TIME)
 
             # Get properties about house
             house = self.driver.find_elements(
-                By.CLASS_NAME, "style-item-params-list-3YJu7"
+                By.CLASS_NAME, "style-item-params-list-vb1_H"
             )
             for items in house:
                 house_properties_list = items.text.split("\n")
@@ -103,18 +90,15 @@ class AvitoParser:
                     properties_list[column] = value.strip()
 
             # Get properties about flat
-            flat = self.driver.find_elements(By.CLASS_NAME, "params-paramsList-2PiKQ")
+            flat = self.driver.find_elements(By.CLASS_NAME, "params-paramsList-zLpAu")
             for items in flat:
                 flat_properties_list = items.text.split("\n")
                 for obj in flat_properties_list:
                     column, value = obj.split(":")[0], obj.split(":")[1]
                     properties_list[column] = value.strip()
-            time.sleep(RAND_TIME)
 
             # Get link
-            link = f"{self.driver.current_url}"
-            properties_list["link"] = link if link else None
-            time.sleep(RAND_TIME)
+            properties_list["link"] = f"{self.driver.current_url}"
         except:
             logger.info("EXCEPT HANDLING PROPERTIES")
             return None
@@ -122,7 +106,7 @@ class AvitoParser:
             return properties_list
 
     def _get_filters(self):
-        """Add filters for search on the avito homepage"""
+        """Add filters for search on avito homepage"""
         self.driver.find_elements(By.CLASS_NAME, "input-layout-stick-before-xYZY2")[0].send_keys("10000000" + Keys.ENTER)
         time.sleep(RAND_TIME)
         self.driver.find_elements(
@@ -156,11 +140,11 @@ class AvitoParser:
         for page_url in pages:
             logger.info(f"CURRENT PAGE: {page_url}")
             self.driver.get(page_url)
-            time.sleep(RAND_TIME)
+            #time.sleep(RAND_TIME)
 
             # Get links on objects from page
             links = self.driver.find_elements(By.CLASS_NAME, "iva-item-root-_lk9K")
-            time.sleep(RAND_TIME)
+            #time.sleep(RAND_TIME)
 
             for obj in range(len(links)):
                 logger.info(F"COLLECTING {obj} LINK")
@@ -178,7 +162,7 @@ class AvitoParser:
                 except:
                     logger.info(f"{obj} LINK WAS NOT COLLECTED {links[obj]}")
 
-    def start_parser(self, count_url: int = MAX_URL_RANGE) -> list:
+    def start_parser(self, count_url: cfg.URL_COUNT) -> list:
         """
         Run the parser
 

@@ -26,37 +26,41 @@ services:
     restart: always
     ports:
       - 5000:5000
-    #network_mode: host
     volumes:
         - ./db:/db
+        - ./files:/files
+        - ./logs:/logs
+        - ./models:/models
 
   mlflow:
     build: ./mlflow
     container_name: mlflow
     ports:
       - 5005:5005
-    #network_mode: host
     volumes:
       - ./mlflow:/mlflow
     command: 'mlflow server --backend-store-uri sqlite:////mlflow/mlflow.db --default-artifact-root /mlflow/artifacts --host 0.0.0.0 --port 5005'
 
-#  postgres:
-#    image: postgres
-#    environment:
-#      - POSTGRES_PASSWORD=postgres
-#      - POSTGRES_USER=postgres
-#      - POSTGRES_DB=airflow
-#    ports:
-#      - 5432:5432
-#    restart: always
+  postgres:
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=airflow
+    ports:
+      - 5432:5432
+    restart: always
 
   airflow:
     build: ./airflow
     container_name: airflow
     restart: always
-#    depends_on:
-#      - postgres
+    depends_on :
+      - postgres
     ports:
       - 8080:8080
     #volumes:
-    #  - ./airflow/dags:/usr/local/airflow/dags
+     # - ./airflow/dags:/usr/local/airflow/dags
+     # - ./airflow/logs:/usr/local/airflow/logs
+     # - ./airflow/plugins:/usr/local/airflow/plugins
+
