@@ -59,8 +59,5 @@ services:
       - postgres
     ports:
       - 8080:8080
-    #volumes:
-     # - ./airflow/dags:/usr/local/airflow/dags
-     # - ./airflow/logs:/usr/local/airflow/logs
-     # - ./airflow/plugins:/usr/local/airflow/plugins
-
+    volumes:
+      - ./airflow/dags:/usr/local/airflow/dags

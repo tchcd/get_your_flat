@@ -1,19 +1,22 @@
 FROM python:3.7
 
 ARG AIRFLOW_VERSION=2.3.4
-ARG AIRFLOW_USER_HOME=/usr/local/airflow
+ARG AIRFLOW_USER_HOME=usr/local/airflow
 ENV AIRFLOW_HOME=${AIRFLOW_USER_HOME}
 
-RUN pip install apache-airflow[postgres]==${AIRFLOW_VERSION}
+RUN pip install apache-airflow==${AIRFLOW_VERSION}
+RUN pip install apache-airflow-providers-ssh
+
 #RUN pip install SQLAlchemy==1.3.23
 
-RUN mkdir /get_your_flat
-
-COPY airflow_cfg/ /get_your_flat/airflow_cfg/
+COPY airflow_cfg/run.sh ${AIRFLOW_HOME}/run.sh
 COPY airflow_cfg/airflow.cfg ${AIRFLOW_HOME}/airflow.cfg
+COPY airflow_cfg/ssh_conn ${AIRFLOW_HOME}/.ssh/ssh_conn
 
-RUN chmod +x /get_your_flat/airflow_cfg/run.sh
+RUN pip install psycopg2
+
+RUN chmod +x /usr/local/airflow/run.sh
 
 EXPOSE 8080
 
-ENTRYPOINT ["/get_your_flat/airflow_cfg/run.sh"]
+ENTRYPOINT ["/usr/local/airflow/run.sh"]

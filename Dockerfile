@@ -1,15 +1,16 @@
 FROM python:3.8
 
-RUN mkdir -p /get_your_flat
-WORKDIR /get_your_flat
+RUN mkdir -p /app
 
-COPY . /get_your_flat/
+WORKDIR /app
+
+COPY . /app
 
 ENV TZ Europe/Moscow RUN echo "Preparing geographic area ..."
 
 RUN pip install -r requirements.txt
 
-ENV PYTHONPATH /get_your_flat
+ENV PYTHONPATH /app
 
 #ENTRYPOINT ["/get_your_flat/run.sh"]
 CMD ["python", "app.py"]
