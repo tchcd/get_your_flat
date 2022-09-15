@@ -29,7 +29,7 @@ SESSION = Path(MAIN_FOLDER) / 'session'
 CHROME_DRIVER = Path(MAIN_FOLDER) / 'chromedriver.exe'
 
 # Parser parameters
-URL_COUNT = 25
+URL_COUNT = 10
 SELENIUM_HEADLESS = True
 
 # ML model parameters
@@ -46,5 +46,5 @@ COLUMNS = ['rating', 'price', 'sqmeter_price', 'subway', 'minutes_to_subway', 'r
 #MLFlow params
 MLFLOW_PATH = Path(f"{MAIN_FOLDER}/reports") / 'mlflow_reports.ini'
 MLFLOW_HOST = "http://mlflow:5005/"
-MLFLOW_NAME_EXPERIMENT = 'local_test'
+MLFLOW_NAME_EXPERIMENT = 'remote_exp_1'
 RANDOM_SEED = 42

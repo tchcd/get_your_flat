@@ -7,8 +7,6 @@ ENV AIRFLOW_HOME=${AIRFLOW_USER_HOME}
 RUN pip install apache-airflow==${AIRFLOW_VERSION}
 RUN pip install apache-airflow-providers-ssh
 
-#RUN pip install SQLAlchemy==1.3.23
-
 COPY airflow_cfg/run.sh ${AIRFLOW_HOME}/run.sh
 COPY airflow_cfg/airflow.cfg ${AIRFLOW_HOME}/airflow.cfg
 COPY airflow_cfg/ssh_conn ${AIRFLOW_HOME}/.ssh/ssh_conn
