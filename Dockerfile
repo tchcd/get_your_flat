@@ -6,11 +6,11 @@ WORKDIR /app
 
 COPY . /app
 
-ENV TZ Europe/Moscow RUN echo "Preparing geographic area ..."
-
 RUN pip install -r requirements.txt
+RUN apt-get update && apt-get install openssh-server -y
+RUN useradd -rm -d /home/ubuntu -s /bin/bash -g root -G sudo -u 1000 app
+RUN echo 'app:psswrd' | chpasswd
+RUN service ssh start
 
-ENV PYTHONPATH /app
 
-#ENTRYPOINT ["/get_your_flat/run.sh"]
-CMD ["python", "app.py"]
+CMD ["bash", "run.sh"]
