@@ -9,7 +9,6 @@ RUN pip install apache-airflow-providers-ssh
 
 COPY airflow_cfg/run.sh ${AIRFLOW_HOME}/run.sh
 COPY airflow_cfg/airflow.cfg ${AIRFLOW_HOME}/airflow.cfg
-COPY airflow_cfg/ssh_conn ${AIRFLOW_HOME}/.ssh/ssh_conn
 
 RUN pip install psycopg2
 

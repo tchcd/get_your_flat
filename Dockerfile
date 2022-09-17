@@ -12,5 +12,6 @@ RUN useradd -rm -d /home/ubuntu -s /bin/bash -g root -G sudo -u 1000 app
 RUN echo 'app:psswrd' | chpasswd
 RUN service ssh start
 
+ENV PYTHONPATH "${PYTHONPATH}:/app"
 
 CMD ["bash", "run.sh"]
