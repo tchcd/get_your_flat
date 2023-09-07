@@ -46,36 +46,36 @@ class AvitoParser:
         self.driver.get(self.url)
         return self
 
-    def _handle_properties(self):
+    def _handle_flat_features(self):
         """Collect flat listing properties"""
         try:
             time.sleep(RAND_TIME)
-            properties_list = {}
+            flat_features = {}
 
             # Get subway
-            properties_list["subway"] = self.driver.find_elements(
+            flat_features["subway"] = self.driver.find_elements(
                 By.CSS_SELECTOR,
                 "#app > div > div.index-root-nb9Lx.index-responsive-yh9uW.index-page_default-RyjXj > div > div.style-item-view-PCYlM.react-exp > div.style-item-view-content-SDgKX > div.style-item-view-content-left-bb5Ih > div.style-item-view-main-tKI1S.js-item-view-main.style-item-min-height-TJwyJ > div.style-item-view-block-SEFaY.style-item-view-map-rppAn.style-opened-bPigk.style-new-style-iX7zV > div > div.style-item-map-location-wbfMT > div.style-item-address-KooqC > div > div > span > span:nth-child(1) > span:nth-child(2)"
             )[0].text
 
-            # Get distance_to_subway_km
-            distance_to_subway_km = self.driver.find_elements(
+            # Get distance_to_subway_minutes
+            distance_to_subway_minutes = self.driver.find_elements(
                 By.CSS_SELECTOR,
                 "#app > div > div.index-root-nb9Lx.index-responsive-yh9uW.index-page_default-RyjXj > div > div.style-item-view-PCYlM.react-exp > div.style-item-view-content-SDgKX > div.style-item-view-content-left-bb5Ih > div.style-item-view-main-tKI1S.js-item-view-main.style-item-min-height-TJwyJ > div.style-item-view-block-SEFaY.style-item-view-map-rppAn.style-opened-bPigk.style-new-style-iX7zV > div > div.style-item-map-location-wbfMT > div.style-item-address-KooqC > div > div > span > span:nth-child(1) > span.style-item-address-georeferences-item-interval-ujKs2")
-            properties_list["minutes_to_subway"] = int(re.findall("(\d+)", distance_to_subway_km[0].text)[-1])
+            flat_features["distance_to_subway_minutes"] = int(re.findall("(\d+)", distance_to_subway_minutes[0].text)[-1])
 
             # Get price
-            properties_list["price"] = int(self.driver.find_elements(
+            flat_features["price"] = int(self.driver.find_elements(
                 By.CLASS_NAME, "style-item-price-text-_w822")[0].text.replace(" ",""))
 
             # Get address
             address = self.driver.find_element(
                 By.CLASS_NAME, "style-item-address__string-wt61A"
             ).text
-            properties_list["address"] = address
+            flat_features["address"] = address
 
             # Get time
-            properties_list["time"] = self.driver.find_element(
+            flat_features["time"] = self.driver.find_element(
                 By.CLASS_NAME, "style-item-footer-Ufxh_"
             ).text
 
@@ -87,7 +87,7 @@ class AvitoParser:
                 house_properties_list = items.text.split("\n")
                 for obj in house_properties_list:
                     column, value = obj.split(":")[0], obj.split(":")[1]
-                    properties_list[column] = value.strip()
+                    flat_features[column] = value.strip()
 
             # Get properties about flat
             flat = self.driver.find_elements(By.CLASS_NAME, "params-paramsList-zLpAu")
@@ -95,15 +95,15 @@ class AvitoParser:
                 flat_properties_list = items.text.split("\n")
                 for obj in flat_properties_list:
                     column, value = obj.split(":")[0], obj.split(":")[1]
-                    properties_list[column] = value.strip()
+                    flat_features[column] = value.strip()
 
             # Get link
-            properties_list["link"] = f"{self.driver.current_url}"
+            flat_features["link"] = f"{self.driver.current_url}"
         except:
             logger.info("EXCEPT HANDLING PROPERTIES")
             return None
         else:
-            return properties_list
+            return flat_features
 
     def _set_filters(self):
         """Add filters for search on avito homepage"""
@@ -150,7 +150,7 @@ class AvitoParser:
                     links[obj].click()
                     time.sleep(RAND_TIME)
                     self.driver.switch_to.window(self.driver.window_handles[1])
-                    data = self._handle_properties() # Start collection data from object
+                    data = self._handle_flat_features() # Start collection data from object
                     if data is not None:
                         self.storage.append(data)
                         logger.info(f"{obj} LINK HAS BEEN COLLECTED")
