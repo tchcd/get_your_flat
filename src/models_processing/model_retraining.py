@@ -22,12 +22,12 @@ class ModelRetraining:
     @staticmethod
     def _get_target(df: pd.DataFrame) -> int:
         """Estimates each item by the expression"""
-        cnt = 0
+        flat_rating = 0
 
         try:
             # price
             const = 1000000
-            cnt += (10 - df['price'] / const) * 0.1  # 0.1 or 0.15 coef
+            flat_rating += (10 - df['price'] / const) * 0.1  # 0.1 or 0.15 coef
 
             # subways
             one = ['Девяткино', 'Звёздная', 'Комендантский проспект', 'Купчино', 'Парнас',
@@ -52,104 +52,104 @@ class ModelRetraining:
                     'Василеостровская']
 
             if df['subway'] in one:
-                cnt += 0.1
+                flat_rating += 0.1
             elif df['subway'] in two:
-                cnt += 0.2
+                flat_rating += 0.2
             elif df['subway'] in three:
-                cnt += 0.3
+                flat_rating += 0.3
             elif df['subway'] in four:
-                cnt += 0.4
+                flat_rating += 0.4
             elif df['subway'] in five:
-                cnt += 0.5
+                flat_rating += 0.5
             else:
-                cnt += 0.25
+                flat_rating += 0.25
 
             # distance_to_subway
             if df['minutes_to_subway'] <= 5:
-                cnt += 0.3
+                flat_rating += 0.3
             elif df['minutes_to_subway'] <= 10:
-                cnt += 0.4
+                flat_rating += 0.4
             elif df['minutes_to_subway'] <= 15:
-                cnt += 0.35
+                flat_rating += 0.35
             elif df['minutes_to_subway'] <= 20:
-                cnt += 0.2
+                flat_rating += 0.2
             elif df['minutes_to_subway'] <= 30:
-                cnt += 0.1
+                flat_rating += 0.1
             elif df['minutes_to_subway'] > 30:
-                cnt += 0
+                flat_rating += 0
             else:
-                cnt += 0.3
+                flat_rating += 0.3
 
             # Floor
             if df['cur_floor'] < 2:
-                cnt += 0
+                flat_rating += 0
             elif df['cur_floor'] == 2:
-                cnt += 0.3
+                flat_rating += 0.3
             elif df['cur_floor'] <= 3:
-                cnt += 0.4
+                flat_rating += 0.4
             elif df['cur_floor'] <= 5:
-                cnt += 0.25
+                flat_rating += 0.25
             elif df['cur_floor'] <= 8:
-                cnt += 0.1
+                flat_rating += 0.1
             elif df['cur_floor'] <= 10:
-                cnt += 0.05
+                flat_rating += 0.05
             elif df['cur_floor'] <= 15:
-                cnt += 0
+                flat_rating += 0
             elif df['cur_floor'] > 15:
-                cnt += 0
+                flat_rating += 0
             else:
-                cnt += 0.1
+                flat_rating += 0.1
 
             # balcony
             if df['balcony'] == 'нет':
-                cnt += 0.05
+                flat_rating += 0.05
             elif df['balcony'] == 'балкон':
-                cnt += 0.25
+                flat_rating += 0.25
             elif df['balcony'] == 'лоджия':
-                cnt += 0.3
+                flat_rating += 0.3
             elif df['balcony'] == 'балкон, лоджия':
-                cnt += 0.25
+                flat_rating += 0.25
             else:
-                cnt += 0.1
+                flat_rating += 0.1
 
             # type_of_hose
             if df['type_of_house'] == 'кирпичный':
-                cnt += 0.35
+                flat_rating += 0.35
             elif df['type_of_house'] == 'панельный':
-                cnt += 0.2
+                flat_rating += 0.2
             elif df['type_of_house'] == 'блочный':
-                cnt += 0.25
+                flat_rating += 0.25
             elif df['type_of_house'] == 'монолитный':
-                cnt += 0.1
+                flat_rating += 0.1
             elif df['type_of_house'] == 'монолитно-кирпичный':
-                cnt += 0.35
+                flat_rating += 0.35
             else:
-                cnt += 0.15
+                flat_rating += 0.15
 
             # renovation
             if df['type_of_renovation'] == 'косметический':
-                cnt += 0.25
+                flat_rating += 0.25
             elif df['type_of_renovation'] == 'требует ремонта':
-                cnt += 0.1
+                flat_rating += 0.1
             elif df['type_of_renovation'] == 'евро':
-                cnt += 0.4
+                flat_rating += 0.4
             elif df['type_of_renovation'] == 'дизайнерский':
-                cnt += 0.4
+                flat_rating += 0.4
             elif df['type_of_renovation'] == 'неизвестно':
-                cnt += 0.1
+                flat_rating += 0.1
             else:
-                cnt += 0.1
+                flat_rating += 0.1
 
             # rooms
             if df['rooms'] == 2:
-                cnt += 0.3
+                flat_rating += 0.3
             if df['rooms'] == 3:
-                cnt += 0.45
+                flat_rating += 0.45
 
         except Exception as err:
             raise exc.RatingEquationFailed from err
         else:
-            return round(cnt * 100)
+            return round(flat_rating * 100)
 
     @staticmethod
     def _prepare_training_dataset(df: pd.DataFrame):

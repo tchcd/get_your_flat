@@ -29,7 +29,7 @@ SESSION = Path(MAIN_FOLDER) / 'session'
 CHROME_DRIVER = Path(MAIN_FOLDER) / 'chromedriver.exe'
 
 # Parser parameters
-URL_COUNT = 10
+PAGES_TO_PARSE_NUM = 10
 SELENIUM_HEADLESS = True
 
 # ML model parameters

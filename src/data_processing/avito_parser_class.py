@@ -38,7 +38,7 @@ class AvitoParser:
         self.rand_time = RAND_TIME
         self.storage = []
 
-    def _auth_avito(self):
+    def _auth(self):
         """Avito user authentication"""
         self.driver.get(self.url)
         for cookie in pickle.load(open(cfg.SESSION, "rb")):
@@ -46,7 +46,7 @@ class AvitoParser:
         self.driver.get(self.url)
         return self
 
-    def _handling_properties(self):
+    def _handle_properties(self):
         """Collect flat listing properties"""
         try:
             time.sleep(RAND_TIME)
@@ -58,11 +58,11 @@ class AvitoParser:
                 "#app > div > div.index-root-nb9Lx.index-responsive-yh9uW.index-page_default-RyjXj > div > div.style-item-view-PCYlM.react-exp > div.style-item-view-content-SDgKX > div.style-item-view-content-left-bb5Ih > div.style-item-view-main-tKI1S.js-item-view-main.style-item-min-height-TJwyJ > div.style-item-view-block-SEFaY.style-item-view-map-rppAn.style-opened-bPigk.style-new-style-iX7zV > div > div.style-item-map-location-wbfMT > div.style-item-address-KooqC > div > div > span > span:nth-child(1) > span:nth-child(2)"
             )[0].text
 
-            # Get distance
-            distance = self.driver.find_elements(
+            # Get distance_to_subway_km
+            distance_to_subway_km = self.driver.find_elements(
                 By.CSS_SELECTOR,
                 "#app > div > div.index-root-nb9Lx.index-responsive-yh9uW.index-page_default-RyjXj > div > div.style-item-view-PCYlM.react-exp > div.style-item-view-content-SDgKX > div.style-item-view-content-left-bb5Ih > div.style-item-view-main-tKI1S.js-item-view-main.style-item-min-height-TJwyJ > div.style-item-view-block-SEFaY.style-item-view-map-rppAn.style-opened-bPigk.style-new-style-iX7zV > div > div.style-item-map-location-wbfMT > div.style-item-address-KooqC > div > div > span > span:nth-child(1) > span.style-item-address-georeferences-item-interval-ujKs2")
-            properties_list["minutes_to_subway"] = int(re.findall("(\d+)", distance[0].text)[-1])
+            properties_list["minutes_to_subway"] = int(re.findall("(\d+)", distance_to_subway_km[0].text)[-1])
 
             # Get price
             properties_list["price"] = int(self.driver.find_elements(
@@ -105,7 +105,7 @@ class AvitoParser:
         else:
             return properties_list
 
-    def _get_filters(self):
+    def _set_filters(self):
         """Add filters for search on avito homepage"""
         self.driver.find_elements(By.CLASS_NAME, "input-layout-stick-before-xYZY2")[0].send_keys("10000000" + Keys.ENTER)
         time.sleep(RAND_TIME)
@@ -125,7 +125,7 @@ class AvitoParser:
         select.select_by_index(3)
         return self
 
-    def _pages_generation(self, count_url):
+    def _get_pages(self, count_url):
         """ Generation correct link-path for parser"""
         page_range = [i for i in range(1, count_url+1)]
         cur_page = self.driver.current_url
@@ -140,11 +140,9 @@ class AvitoParser:
         for page_url in pages:
             logger.info(f"CURRENT PAGE: {page_url}")
             self.driver.get(page_url)
-            #time.sleep(RAND_TIME)
 
             # Get links on objects from page
             links = self.driver.find_elements(By.CLASS_NAME, "iva-item-root-_lk9K")
-            #time.sleep(RAND_TIME)
 
             for obj in range(len(links)):
                 logger.info(F"COLLECTING {obj} LINK")
@@ -152,7 +150,7 @@ class AvitoParser:
                     links[obj].click()
                     time.sleep(RAND_TIME)
                     self.driver.switch_to.window(self.driver.window_handles[1])
-                    data = self._handling_properties() # Start collection data from object
+                    data = self._handle_properties() # Start collection data from object
                     if data is not None:
                         self.storage.append(data)
                         logger.info(f"{obj} LINK HAS BEEN COLLECTED")
@@ -162,7 +160,7 @@ class AvitoParser:
                 except:
                     logger.info(f"{obj} LINK WAS NOT COLLECTED {links[obj]}")
 
-    def start_parser(self, count_url: cfg.URL_COUNT) -> list:
+    def start_parser(self, count_url: cfg.PAGES_TO_PARSE_NUM) -> list:
         """
         Run the parser
 
@@ -170,9 +168,9 @@ class AvitoParser:
         :return: list of dictionaries with listing objects
         """
         try:
-            self._auth_avito()
-            self._get_filters()
-            pages_to_parse = self._pages_generation(count_url=count_url)
+            self._auth()
+            self._set_filters()
+            pages_to_parse = self._get_pages(count_url=count_url)
             self._parse_objects(pages_to_parse)
         except Exception as err:
             raise exc.ParsingNotComplete from err

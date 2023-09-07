@@ -21,7 +21,7 @@ MODEL = pickle.load(open(MODEL_PATH, "rb"))
 COLUMNS = MODEL.feature_names_
 
 
-def get_new_items_predict(model, database: Database) -> pd.DataFrame:
+def predict_new_flats_rating(model, database: Database) -> pd.DataFrame:
     """
     Predict not evaluated items after parsing function.
     Get not estimated items from db -> predict rating for them -> update rating in db.
@@ -31,7 +31,7 @@ def get_new_items_predict(model, database: Database) -> pd.DataFrame:
         if len(df) == 0:
             raise exc.NotItemsWithoutRating
         df["rating"] = model.predict(df[COLUMNS])
-        database.update_estimated_items(df)
+        database.update_flat_rating(df)
     except exc.DBConnectionFailed:
         raise
     except exc.NotItemsWithoutRating:
@@ -45,4 +45,4 @@ def get_new_items_predict(model, database: Database) -> pd.DataFrame:
 
 if __name__ == "__main__":
     db = Database()
-    get_new_items_predict(MODEL, db)
+    predict_new_flats_rating(MODEL, db)

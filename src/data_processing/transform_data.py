@@ -10,7 +10,7 @@ logging.config.dictConfig(logger_cfg)
 logger = logging.getLogger('logger')
 
 
-class DataTransformation:
+class DataHandler:
     # def __init__(self, raw_data):
     #    self.data = raw_data
 
@@ -122,7 +122,7 @@ class DataTransformation:
         df.loc[df["balcony"].isna(), "balcony"] = "нет"
         return df
 
-    def _check_valid_columns(self, raw_data: list) -> list:
+    def _get_valid_columns(self, raw_data: list) -> list:
         """checks if the required keys exists in the raw items"""
         need_keys = ['time', 'price', "subway", "minutes_to_subway",
                      "Количество комнат", "Общая площадь", "Этаж"]
@@ -138,7 +138,7 @@ class DataTransformation:
 
         try:
             logger.info('START PARSED DATA PREPARING')
-            valid_items = self._check_valid_columns(raw_data)
+            valid_items = self._get_valid_columns(raw_data)
             df = self._create_df(valid_items)
             df = self._transform_time(df)
             df = self._transfrom_subway(df)
@@ -156,7 +156,7 @@ class DataTransformation:
             return df
 
 
-class SaveToJson:
+class JsonWriter:
     def __init__(self, data: list) -> None:
         self.data = data
 
@@ -165,7 +165,7 @@ class SaveToJson:
             json.dump(self.data, file, indent=4, ensure_ascii=False)
 
 
-class SaveToCsv:
+class CsvWriter:
     def __init__(self, df: pd.DataFrame) -> None:
         self.dataframe = df
 

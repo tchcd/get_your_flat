@@ -28,13 +28,13 @@ def parse_top_item():
     """Parse required features from db top item"""
     db = Database()
 
-    top_flat_link = db.get_top_item()
+    top_flat_link = db.get_flat_with_max_rating()
     link = top_flat_link.link
     price = top_flat_link.price
     subway = top_flat_link.subway
     item_id = top_flat_link.item_id
 
-    db.update_shown_item(item_id)  # Set DB.shown = 1 for sent item
+    db.set_is_ad_shown(item_id)  # Set DB.shown = 1 for sent item
 
     return link, price, subway, item_id
 
